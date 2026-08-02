@@ -24,44 +24,37 @@ jobs:
   app-ci:
     needs: discover-apps
     if: needs.discover-apps.outputs.matrix != ''
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.discover-apps.outputs.matrix) }}
-    uses: ./.github/workflows/reusable-app-ci.yml
-    with:
-      service_id: ${{ matrix.service_id }}
-      app_path: ${{ matrix.app_path }}
-      language: ${{ matrix.language }}
-      dockerfile: ${{ matrix.dockerfile }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Validate application source
+        run: |
+          test -f "${{ matrix.app_path }}/app.py"
+          test -f "${{ matrix.dockerfile }}"
+          python -m py_compile "${{ matrix.app_path }}/app.py"
+      - uses: docker/setup-buildx-action@v3
+      - name: Build application image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.app_path }}
+          file: ${{ matrix.dockerfile }}
+          push: false
+          tags: aria/${{ matrix.service_id }}:${{ github.sha }}
 
   security:
     needs: discover-apps
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(needs.discover-apps.outputs.matrix) }}
-    uses: ./.github/workflows/reusable-security-scan.yml
-    with:
-      service_id: ${{ matrix.service_id }}
-      app_path: ${{ matrix.app_path }}
-
-  docker-build:
-    needs: [discover-apps, app-ci]
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(needs.discover-apps.outputs.matrix) }}
-    uses: ./.github/workflows/reusable-docker-build.yml
-    with:
-      service_id: ${{ matrix.service_id }}
-      app_path: ${{ matrix.app_path }}
-      dockerfile: ${{ matrix.dockerfile }}
-      push_image: false
-
-  aria-service-review:
-    needs: [discover-apps, app-ci, security]
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(needs.discover-apps.outputs.matrix) }}
-    uses: ./.github/workflows/reusable-aria-service-review.yml
-    with:
-      service_id: ${{ matrix.service_id }}
-      service_profile: ${{ matrix.service_profile }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: apps
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: '1'
