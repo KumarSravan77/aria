@@ -46,5 +46,22 @@ def test_application_dashboard_and_verifier_exist():
 
 
 def test_demo_kubernetes_manifests_parse():
-    for name in ("sample-checkout-api.yaml", "inventory-api.yaml"):
+    for name in ("sample-checkout-api.yaml", "inventory-api.yaml", "banking-demo.yaml"):
         assert list(yaml.safe_load_all((ROOT / "k8s/apps" / name).read_text()))
+
+
+def test_featured_banking_demo_is_fictional_and_correlated():
+    services = ("banking-api", "fraud-detection-api", "transaction-ledger-api")
+    for service in services:
+        source = (ROOT / "apps" / service / "app.py").read_text()
+        assert "OTLPSpanExporter" in source
+        assert '"trace_id"' in source
+        assert '"span_id"' in source
+        assert "mapletrust-bank" in source
+    banking = (ROOT / "apps/banking-api/app.py").read_text()
+    assert "RequestsInstrumentor().instrument()" in banking
+    assert "fraud-detection-api" in banking
+    assert "transaction-ledger-api" in banking
+    docs = (ROOT / "docs/END_TO_END_OBSERVABILITY_DEMO.md").read_text()
+    assert "fictional Canadian" in docs
+    assert "not affiliated with CIBC, RBC" in docs

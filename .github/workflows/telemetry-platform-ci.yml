@@ -1,10 +1,10 @@
 name: telemetry-platform-ci
 on:
   pull_request:
-    paths: ["telemetry/**", "apps/sample-checkout-api/**", "apps/inventory-api/**", "k8s/monitoring/**", "server/telemetry/**", "server/agents/telemetry_pipeline_agent.py", "tests/test_telemetry*", "tests/test_end_to_end_observability_demo.py", ".github/workflows/telemetry-platform-ci.yml"]
+    paths: ["telemetry/**", "apps/**", "k8s/apps/**", "k8s/monitoring/**", "server/telemetry/**", "server/agents/telemetry_pipeline_agent.py", "tests/test_telemetry*", "tests/test_end_to_end_observability_demo.py", ".github/workflows/telemetry-platform-ci.yml"]
   push:
     branches: [main]
-    paths: ["telemetry/**", "apps/sample-checkout-api/**", "apps/inventory-api/**", "k8s/monitoring/**", "server/telemetry/**", "server/agents/telemetry_pipeline_agent.py", "tests/test_telemetry*", "tests/test_end_to_end_observability_demo.py"]
+    paths: ["telemetry/**", "apps/**", "k8s/apps/**", "k8s/monitoring/**", "server/telemetry/**", "server/agents/telemetry_pipeline_agent.py", "tests/test_telemetry*", "tests/test_end_to_end_observability_demo.py"]
 permissions: {contents: read}
 jobs:
   validate:
@@ -28,5 +28,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: aquasecurity/trivy-action@0.28.0
+      - uses: aquasecurity/trivy-action@v0.36.0
         with: {scan-type: fs, scan-ref: ., severity: HIGH,CRITICAL, exit-code: "1"}

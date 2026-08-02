@@ -16,6 +16,12 @@ control_plane = ARIAPlatformControlPlane()
 reporter = MarkdownServiceReviewReport()
 spec_evaluator = SpecDrivenEvaluator(SpecLoader())
 
+
+def evaluate_service_specs(request: Dict[str, Any]) -> Dict[str, Any]:
+    """Keep spec evaluation usable without the optional FastAPI dependency."""
+    service_id = request.get("service_id", "payments-api")
+    return spec_evaluator.evaluate_service(service_id).to_dict()
+
 if APIRouter:
     router = APIRouter(prefix="/aria/platform", tags=["ARIA AI Self-Service Platform"])
 
@@ -57,9 +63,6 @@ if APIRouter:
     def score_transaction(request: Dict[str, Any]) -> Dict[str, Any]:
         return control_plane.score_transaction_event(request)
 
-    @router.post("/specs/evaluate")
-    def evaluate_service_specs(request: Dict[str, Any]) -> Dict[str, Any]:
-        service_id = request.get("service_id", "payments-api")
-        return spec_evaluator.evaluate_service(service_id).to_dict()
+    router.post("/specs/evaluate")(evaluate_service_specs)
 else:
     router = None

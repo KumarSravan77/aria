@@ -86,16 +86,23 @@ k8s-deploy-app: ## Build and deploy sample app and investigator to Kind
 	kind load docker-image checkout-api:local --name $(CLUSTER)
 	docker build -t inventory-api:local apps/inventory-api
 	kind load docker-image inventory-api:local --name $(CLUSTER)
+	docker build -t banking-api:local apps/banking-api
+	kind load docker-image banking-api:local --name $(CLUSTER)
+	docker build -t fraud-detection-api:local apps/fraud-detection-api
+	kind load docker-image fraud-detection-api:local --name $(CLUSTER)
+	docker build -t transaction-ledger-api:local apps/transaction-ledger-api
+	kind load docker-image transaction-ledger-api:local --name $(CLUSTER)
 	docker build -t aria:local -f server/Dockerfile .
 	kind load docker-image aria:local --name $(CLUSTER)
 	kubectl apply -f k8s/apps/sample-checkout-api.yaml
 	kubectl apply -f k8s/apps/inventory-api.yaml
+	kubectl apply -f k8s/apps/banking-demo.yaml
 	kubectl apply -f k8s/apps/aria-api.yaml
 	kubectl apply -f k8s/monitoring/grafana-application-dashboard.yaml
 
-port-forward: ## Port-forward API, sample app, Grafana, Prometheus
+port-forward: ## Port-forward ARIA, banking API, Grafana, and Prometheus
 	@echo "Starting port-forwards. Keep this terminal open."
-	kubectl -n sre port-forward svc/aria-api 8080:8080 & 	kubectl -n sre port-forward svc/chroma 8000:8000 & 	kubectl -n demo port-forward svc/checkout-api 9000:9000 & 	kubectl -n monitoring port-forward svc/kube-prometheus-stack-grafana 3000:80 & 	kubectl -n monitoring port-forward svc/kube-prometheus-stack-prometheus 9090:9090 & wait
+	kubectl -n sre port-forward svc/aria-api 8080:8080 & 	kubectl -n sre port-forward svc/chroma 8000:8000 & 	kubectl -n demo port-forward svc/banking-api 9200:9200 & 	kubectl -n monitoring port-forward svc/kube-prometheus-stack-grafana 3000:80 & 	kubectl -n monitoring port-forward svc/kube-prometheus-stack-prometheus 9090:9090 & wait
 
 generate-latency: ## Enable latency in sample app
 	kubectl -n demo set env deployment/checkout-api CHAOS_LATENCY_MS=1200 CHAOS_ERROR_RATE=0.1
@@ -103,9 +110,14 @@ generate-latency: ## Enable latency in sample app
 clear-latency: ## Clear latency in sample app
 	kubectl -n demo set env deployment/checkout-api CHAOS_LATENCY_MS=0 CHAOS_ERROR_RATE=0
 	kubectl -n demo set env deployment/inventory-api INVENTORY_DELAY_MS=0
+	kubectl -n demo set env deployment/fraud-detection-api FRAUD_DELAY_MS=0
+	kubectl -n demo set env deployment/transaction-ledger-api LEDGER_FAILURE=false
 
 generate-dependency-latency: ## Slow inventory to demonstrate cross-service trace correlation
-	kubectl -n demo set env deployment/inventory-api INVENTORY_DELAY_MS=1200
+	kubectl -n demo set env deployment/fraud-detection-api FRAUD_DELAY_MS=1200
+
+generate-ledger-failure: ## Fail ledger writes to demonstrate banking dependency RCA
+	kubectl -n demo set env deployment/transaction-ledger-api LEDGER_FAILURE=true
 
 verify-e2e-observability: ## Prove a request appears in Prometheus, Loki, and Tempo
 	python3 scripts/verify_e2e_observability.py

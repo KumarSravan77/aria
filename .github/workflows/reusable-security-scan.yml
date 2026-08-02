@@ -20,7 +20,7 @@ jobs:
         uses: gitleaks/gitleaks-action@v2
         continue-on-error: true
       - name: Filesystem vulnerability scan with Trivy
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: fs
           scan-ref: ${{ inputs.app_path }}

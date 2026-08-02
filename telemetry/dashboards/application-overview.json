@@ -1,10 +1,10 @@
 {
-  "title": "ARIA End-to-End Application Observability",
+  "title": "MapleTrust Banking End-to-End Observability",
   "uid": "aria-app-e2e",
   "schemaVersion": 39,
   "tags": ["aria", "opentelemetry", "correlation"],
   "time": {"from": "now-1h", "to": "now"},
-  "templating": {"list": [{"name": "service", "type": "custom", "query": "checkout-api,inventory-api", "current": {"text": "checkout-api", "value": "checkout-api"}}]},
+  "templating": {"list": [{"name": "service", "type": "custom", "query": "banking-api,fraud-detection-api,transaction-ledger-api", "current": {"text": "banking-api", "value": "banking-api"}}]},
   "panels": [
     {"type": "stat", "title": "Request rate", "datasource": {"type": "prometheus", "uid": "prometheus"}, "targets": [{"expr": "sum(rate(traces_span_metrics_calls_total{service_name=\"$service\"}[5m]))"}], "gridPos": {"x": 0, "y": 0, "w": 6, "h": 5}},
     {"type": "stat", "title": "Error rate", "datasource": {"type": "prometheus", "uid": "prometheus"}, "targets": [{"expr": "sum(rate(traces_span_metrics_calls_total{service_name=\"$service\",status_code=\"STATUS_CODE_ERROR\"}[5m])) / clamp_min(sum(rate(traces_span_metrics_calls_total{service_name=\"$service\"}[5m])), 0.001)"}], "gridPos": {"x": 6, "y": 0, "w": 6, "h": 5}},

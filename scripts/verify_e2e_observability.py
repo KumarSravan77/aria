@@ -7,7 +7,7 @@ import time
 import requests
 
 
-CHECKOUT = os.getenv("CHECKOUT_URL", "http://localhost:9000")
+BANKING = os.getenv("BANKING_URL", "http://localhost:9200")
 PROMETHEUS = os.getenv("PROMETHEUS_URL", "http://localhost:9090")
 LOKI = os.getenv("LOKI_URL", "http://localhost:3100")
 TEMPO = os.getenv("TEMPO_URL", "http://localhost:3200")
@@ -19,13 +19,15 @@ def get_json(url, **kwargs):
     return response.json()
 
 
-checkout = get_json(f"{CHECKOUT}/checkout")
-trace_id = checkout.get("trace_id")
+response = requests.post(f"{BANKING}/transactions", params={"amount": 125}, timeout=10)
+response.raise_for_status()
+transaction = response.json()
+trace_id = transaction.get("trace_id")
 if not trace_id or len(trace_id) != 32:
-    raise SystemExit("checkout response did not return a valid trace_id")
+    raise SystemExit("banking response did not return a valid trace_id")
 
 time.sleep(int(os.getenv("TELEMETRY_SETTLE_SECONDS", "10")))
-metrics = get_json(f"{PROMETHEUS}/api/v1/query", params={"query": "sum(checkout_requests_total)"})
+metrics = get_json(f"{PROMETHEUS}/api/v1/query", params={"query": "sum(banking_transactions_total)"})
 logs = get_json(f"{LOKI}/loki/api/v1/query_range", params={"query": f'{{namespace="demo"}} |= "{trace_id}"', "limit": 20})
 trace = get_json(f"{TEMPO}/api/traces/{trace_id}")
 

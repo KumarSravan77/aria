@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: banking-api, namespace: demo}
+spec:
+  replicas: 2
+  selector: {matchLabels: {app: banking-api}}
+  template:
+    metadata: {labels: {app: banking-api}}
+    spec:
+      containers:
+        - name: banking-api
+          image: banking-api:local
+          imagePullPolicy: Never
+          ports: [{name: http, containerPort: 9200}]
+          env:
+            - {name: FRAUD_URL, value: http://fraud-detection-api:9300}
+            - {name: LEDGER_URL, value: http://transaction-ledger-api:9400}
+            - {name: OTEL_EXPORTER_OTLP_ENDPOINT, value: otel-gateway.telemetry.svc.cluster.local:4317}
+          readinessProbe: {httpGet: {path: /health, port: http}, initialDelaySeconds: 5}
+          resources: {requests: {cpu: 100m, memory: 128Mi}, limits: {cpu: 500m, memory: 256Mi}}
+          securityContext: {allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, runAsNonRoot: true}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: banking-api, namespace: demo, labels: {app: banking-api}}
+spec: {selector: {app: banking-api}, ports: [{name: http, port: 9200, targetPort: http}]}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: fraud-detection-api, namespace: demo}
+spec:
+  replicas: 2
+  selector: {matchLabels: {app: fraud-detection-api}}
+  template:
+    metadata: {labels: {app: fraud-detection-api}}
+    spec:
+      containers:
+        - name: fraud-detection-api
+          image: fraud-detection-api:local
+          imagePullPolicy: Never
+          ports: [{name: http, containerPort: 9300}]
+          env:
+            - {name: FRAUD_DELAY_MS, value: "0"}
+            - {name: DECLINE_THRESHOLD, value: "5000"}
+            - {name: OTEL_EXPORTER_OTLP_ENDPOINT, value: otel-gateway.telemetry.svc.cluster.local:4317}
+          readinessProbe: {httpGet: {path: /health, port: http}, initialDelaySeconds: 5}
+          resources: {requests: {cpu: 100m, memory: 128Mi}, limits: {cpu: 500m, memory: 256Mi}}
+          securityContext: {allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, runAsNonRoot: true}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: fraud-detection-api, namespace: demo, labels: {app: fraud-detection-api}}
+spec: {selector: {app: fraud-detection-api}, ports: [{name: http, port: 9300, targetPort: http}]}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: transaction-ledger-api, namespace: demo}
+spec:
+  replicas: 2
+  selector: {matchLabels: {app: transaction-ledger-api}}
+  template:
+    metadata: {labels: {app: transaction-ledger-api}}
+    spec:
+      containers:
+        - name: transaction-ledger-api
+          image: transaction-ledger-api:local
+          imagePullPolicy: Never
+          ports: [{name: http, containerPort: 9400}]
+          env:
+            - {name: LEDGER_FAILURE, value: "false"}
+            - {name: OTEL_EXPORTER_OTLP_ENDPOINT, value: otel-gateway.telemetry.svc.cluster.local:4317}
+          readinessProbe: {httpGet: {path: /health, port: http}, initialDelaySeconds: 5}
+          resources: {requests: {cpu: 100m, memory: 128Mi}, limits: {cpu: 500m, memory: 256Mi}}
+          securityContext: {allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, runAsNonRoot: true}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: transaction-ledger-api, namespace: demo, labels: {app: transaction-ledger-api}}
+spec: {selector: {app: transaction-ledger-api}, ports: [{name: http, port: 9400, targetPort: http}]}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata: {name: banking-demo, namespace: demo, labels: {release: kube-prometheus-stack}}
+spec:
+  selector: {matchLabels: {app: banking-api}}
+  endpoints: [{port: http, path: /metrics, interval: 15s}]
