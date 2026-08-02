@@ -1,10 +1,10 @@
 name: telemetry-platform-ci
 on:
   pull_request:
-    paths: ["telemetry/**", "server/telemetry/**", "server/agents/telemetry_pipeline_agent.py", "tests/test_telemetry*", ".github/workflows/telemetry-platform-ci.yml"]
+    paths: ["telemetry/**", "apps/sample-checkout-api/**", "apps/inventory-api/**", "k8s/monitoring/**", "server/telemetry/**", "server/agents/telemetry_pipeline_agent.py", "tests/test_telemetry*", "tests/test_end_to_end_observability_demo.py", ".github/workflows/telemetry-platform-ci.yml"]
   push:
     branches: [main]
-    paths: ["telemetry/**", "server/telemetry/**", "server/agents/telemetry_pipeline_agent.py", "tests/test_telemetry*"]
+    paths: ["telemetry/**", "apps/sample-checkout-api/**", "apps/inventory-api/**", "k8s/monitoring/**", "server/telemetry/**", "server/agents/telemetry_pipeline_agent.py", "tests/test_telemetry*", "tests/test_end_to_end_observability_demo.py"]
 permissions: {contents: read}
 jobs:
   validate:
@@ -14,10 +14,11 @@ jobs:
       - uses: actions/setup-python@v5
         with: {python-version: "3.11", cache: pip}
       - run: pip install -r server/requirements.txt
-      - run: pytest tests/test_telemetry_platform.py tests/test_telemetry_assets.py -q
+      - run: pytest tests/test_telemetry_platform.py tests/test_telemetry_assets.py tests/test_end_to_end_observability_demo.py -q
       - uses: azure/setup-kubectl@v4
         with: {version: v1.31.0}
       - run: kubectl kustomize telemetry/overlays/local > /tmp/aria-telemetry.yaml
+      - run: kubectl kustomize k8s/apps > /tmp/aria-demo-apps.yaml
       - run: test -s /tmp/aria-telemetry.yaml
       - uses: helm/kind-action@v1
         with: {install_only: true}

@@ -17,6 +17,10 @@
 - k6 workload and Chaos Mesh scenarios
 - Static asset, safety contract, and Python tests
 - Focused CI workflow
+- Multi-service checkout-to-inventory distributed tracing demonstration
+- W3C HTTP context propagation and trace-correlated structured application logs
+- Prometheus exemplars, span-derived RED metrics, and Grafana trace/log/metric links
+- Automated cross-backend verification script and slow-dependency scenario
 
 ## Environment-dependent validation
 

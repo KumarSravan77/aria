@@ -84,10 +84,14 @@ k8s-bootstrap: ## Install namespaces, metrics stack, and base config
 k8s-deploy-app: ## Build and deploy sample app and investigator to Kind
 	docker build -t checkout-api:local apps/sample-checkout-api
 	kind load docker-image checkout-api:local --name $(CLUSTER)
+	docker build -t inventory-api:local apps/inventory-api
+	kind load docker-image inventory-api:local --name $(CLUSTER)
 	docker build -t aria:local -f server/Dockerfile .
 	kind load docker-image aria:local --name $(CLUSTER)
 	kubectl apply -f k8s/apps/sample-checkout-api.yaml
+	kubectl apply -f k8s/apps/inventory-api.yaml
 	kubectl apply -f k8s/apps/aria-api.yaml
+	kubectl apply -f k8s/monitoring/grafana-application-dashboard.yaml
 
 port-forward: ## Port-forward API, sample app, Grafana, Prometheus
 	@echo "Starting port-forwards. Keep this terminal open."
@@ -98,6 +102,13 @@ generate-latency: ## Enable latency in sample app
 
 clear-latency: ## Clear latency in sample app
 	kubectl -n demo set env deployment/checkout-api CHAOS_LATENCY_MS=0 CHAOS_ERROR_RATE=0
+	kubectl -n demo set env deployment/inventory-api INVENTORY_DELAY_MS=0
+
+generate-dependency-latency: ## Slow inventory to demonstrate cross-service trace correlation
+	kubectl -n demo set env deployment/inventory-api INVENTORY_DELAY_MS=1200
+
+verify-e2e-observability: ## Prove a request appears in Prometheus, Loki, and Tempo
+	python3 scripts/verify_e2e_observability.py
 
 kill-pod: ## Delete one sample app pod to simulate incident
 	kubectl -n demo delete pod -l app=checkout-api --wait=false

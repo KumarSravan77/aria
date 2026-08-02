@@ -28,6 +28,12 @@ spec:
               value: "0"
             - name: CHAOS_ERROR_RATE
               value: "0"
+            - name: INVENTORY_URL
+              value: http://inventory-api.demo.svc.cluster.local:9100
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: otel-gateway.telemetry.svc.cluster.local:4317
+            - name: OTEL_PROPAGATORS
+              value: tracecontext,baggage
           readinessProbe:
             httpGet:
               path: /health
@@ -41,6 +47,10 @@ spec:
             limits:
               cpu: 500m
               memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
 ---
 apiVersion: v1
 kind: Service
@@ -56,3 +66,10 @@ spec:
     - name: http
       port: 9000
       targetPort: 9000
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata: {name: checkout-api, namespace: demo, labels: {release: kube-prometheus-stack}}
+spec:
+  selector: {matchLabels: {app: checkout-api}}
+  endpoints: [{port: http, path: /metrics, interval: 15s}]

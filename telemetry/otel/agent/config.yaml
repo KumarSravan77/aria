@@ -12,6 +12,9 @@ data:
         start_at: end
         operators:
           - type: container
+          - type: json_parser
+            parse_from: body
+            if: 'body matches "^\\{"'
       hostmetrics:
         collection_interval: 30s
         scrapers: {cpu: {}, memory: {}, filesystem: {}, network: {}}

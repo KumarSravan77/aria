@@ -1,8 +1,42 @@
 grafana:
   adminPassword: admin
+  additionalDataSources:
+    - name: Loki
+      uid: loki
+      type: loki
+      access: proxy
+      url: http://loki-gateway.telemetry.svc.cluster.local
+      jsonData:
+        derivedFields:
+          - name: TraceID
+            matcherRegex: '"trace_id"\s*:\s*"([a-f0-9]{32})"'
+            datasourceUid: tempo
+            url: '$${__value.raw}'
+    - name: Tempo
+      uid: tempo
+      type: tempo
+      access: proxy
+      url: http://tempo.telemetry.svc.cluster.local:3200
+      jsonData:
+        nodeGraph: {enabled: true}
+        serviceMap: {datasourceUid: prometheus}
+        tracesToLogsV2:
+          datasourceUid: loki
+          spanStartTimeShift: -1m
+          spanEndTimeShift: 1m
+          customQuery: true
+          query: '{namespace="demo"} | json | trace_id="$${__trace.traceId}"'
+        tracesToMetrics:
+          datasourceUid: prometheus
+          spanStartTimeShift: -1m
+          spanEndTimeShift: 1m
+          queries:
+            - name: Request rate
+              query: 'sum(rate(traces_span_metrics_calls_total{service_name="$${__span.tags["service.name"]}"}[5m]))'
 prometheus:
   prometheusSpec:
     serviceMonitorSelectorNilUsesHelmValues: false
     podMonitorSelectorNilUsesHelmValues: false
+    enableFeatures: [exemplar-storage]
 alertmanager:
   enabled: true

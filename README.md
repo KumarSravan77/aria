@@ -28,6 +28,8 @@ This repository is a local-first, GitHub-ready AI-SRE project that demonstrates 
 
 ARIA now also includes a Kubernetes telemetry data plane under `telemetry/`: OpenTelemetry node agents and gateways, Kafka-compatible buffering, Vector processing, scalable storage profiles, pipeline dashboards, load/failure scenarios, capacity planning, and a recommendation-only telemetry intelligence agent. See `docs/architecture/TELEMETRY_DATA_PLANE.md` and `docs/TELEMETRY_IMPLEMENTATION_STATUS.md`.
 
+The end-to-end demo adds an instrumented checkout-to-inventory request path with W3C context propagation, trace-correlated JSON logs, Prometheus exemplars, span-derived RED metrics, and Grafana links between Prometheus, Loki, and Tempo. See `docs/END_TO_END_OBSERVABILITY_DEMO.md`.
+
 It is designed for SRE, DevOps, Platform Engineering, AIOps, DevSecOps, and LLMOps interviews.
 
 ## What this project does
