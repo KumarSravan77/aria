@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: goalert
+  namespace: paging
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: goalert
+  template:
+    metadata:
+      labels:
+        app: goalert
+    spec:
+      containers:
+        - name: goalert
+          image: goalert/goalert:latest
+          ports:
+            - containerPort: 8081
+          env:
+            - name: GOALERT_LISTEN
+              value: ":8081"
+            - name: GOALERT_DB_URL
+              value: "sqlite3:///data/goalert.db"
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: goalert
+  namespace: paging
+spec:
+  selector:
+    app: goalert
+  ports:
+    - port: 8081
+      targetPort: 8081

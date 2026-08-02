@@ -1,0 +1,20 @@
+# Local ReBAC relationship seed for demo mode.
+# In production this can be replaced by OpenFGA tuples.
+users:
+  test-sre:
+    teams: [platform]
+  test-commander:
+    teams: [platform]
+  local-sre:
+    teams: [platform]
+  payments-sre:
+    teams: [payments]
+teams:
+  platform:
+    owns_services: [incident-investigator, checkout-api, kubernetes-platform]
+    supports_services: [checkout-api, payment-api, payments-api, order-api, kubernetes-platform]
+    can_approve_services: [checkout-api, payment-api, payments-api, order-api, kubernetes-platform]
+  payments:
+    owns_services: [checkout-api, payment-api, payments-api, order-api]
+    supports_services: [checkout-api, payment-api, order-api]
+    can_approve_services: [checkout-api, payment-api, payments-api, order-api]

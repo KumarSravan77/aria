@@ -1,0 +1,22 @@
+version: 1
+remediations:
+  - id: scale-otel-gateway
+    action: scale_gateway
+    mode: gitops_proposal
+    constraints: {min_replicas: 3, max_replicas: 20, evidence_required: [collector_queue_utilization]}
+    approval: required
+  - id: increase-vector-consumers
+    action: increase_consumer_concurrency
+    mode: gitops_proposal
+    constraints: {min_replicas: 3, max_replicas: 30, evidence_required: [kafka_consumer_lag]}
+    approval: required
+  - id: quarantine-noisy-tenant
+    action: quarantine_noisy_tenant
+    mode: recommendation_only
+    constraints: {evidence_required: [tenant_volume_share, owner_lookup]}
+    approval: required
+  - id: change-retention
+    action: adjust_retention
+    mode: recommendation_only
+    constraints: {evidence_required: [storage_growth, compliance_policy]}
+    approval: required

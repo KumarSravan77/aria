@@ -1,0 +1,40 @@
+capability:
+  name: gitops-standards
+  version: 1.0.0
+  category: delivery
+  description: Standard GitHub Actions CI to ArgoCD GitOps CD architecture for Kubernetes services.
+
+checks:
+  - name: github_actions_ci_required
+    severity: P1
+    expected: Application has reusable GitHub Actions workflow for build, test, scan, and package.
+  - name: docker_image_publish_required
+    severity: P1
+    expected: Container images are built once, scanned, signed or attestable, and pushed to a registry.
+  - name: helm_or_kustomize_required
+    severity: P1
+    expected: Deployment configuration is represented as Helm or Kustomize in Git.
+  - name: argocd_application_required
+    severity: P1
+    expected: ArgoCD Application controls deployment and cluster reconciliation.
+  - name: environment_promotion_required
+    severity: P1
+    expected: Promotion between dev/stage/prod is Git-based and approval-gated.
+  - name: rollback_path_required
+    severity: P0
+    expected: Rollback is possible through Git revert, ArgoCD rollback, or previous Helm release.
+  - name: deployment_health_gate_required
+    severity: P1
+    expected: Deployment waits for Kubernetes/Argo health and SLO smoke checks.
+
+outputs:
+  - gitops_grade
+  - ci_findings
+  - cd_findings
+  - rollback_findings
+  - promotion_gate_findings
+
+production_gates:
+  block_on_missing_argocd_app: true
+  block_on_missing_rollback: true
+  require_prod_approval: true

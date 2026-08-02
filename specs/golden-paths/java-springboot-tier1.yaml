@@ -1,0 +1,36 @@
+golden_path:
+  name: java-springboot-tier1
+  version: 1.0.0
+  applies_to:
+    runtime: java
+    framework: spring-boot
+    tier: tier1
+  required_capabilities: &id001
+  - kubernetes-standards
+  - observability-standards
+  - cicd-standards
+  - reliability-standards
+  - service-mesh-standards
+  - gitops-standards
+  - devsecops-standards
+required_capabilities: *id001
+required_artifacts:
+- Dockerfile
+- helm_chart
+- github_actions_ci
+- argocd_application
+- otel_config
+- slo_config
+- runbook
+- dashboard
+- alerts
+minimum_scores:
+  kubernetes: B
+  observability: B
+  cicd: B
+  reliability: B
+production_gates:
+  require_approval: true
+  block_on_p0: true
+  block_on_missing_slo: true
+  block_on_missing_rollback: true

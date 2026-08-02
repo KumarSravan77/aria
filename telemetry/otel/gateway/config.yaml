@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: ConfigMap
+metadata: {name: otel-gateway-config, namespace: telemetry}
+data:
+  collector.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc: {endpoint: 0.0.0.0:4317}
+          http: {endpoint: 0.0.0.0:4318}
+    processors:
+      memory_limiter: {check_interval: 2s, limit_mib: 1536, spike_limit_mib: 384}
+      transform/redact:
+        error_mode: ignore
+        log_statements:
+          - context: log
+            statements:
+              - replace_pattern(body, "(?i)authorization:[ ]*bearer[ ]+[^ ]+", "authorization: [REDACTED]")
+              - replace_pattern(body, "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}", "[REDACTED_EMAIL]")
+      filter/debug:
+        error_mode: ignore
+        logs:
+          log_record: ['severity_number < SEVERITY_NUMBER_INFO and resource.attributes["deployment.environment.name"] == "prod"']
+      batch: {timeout: 2s, send_batch_size: 4096, send_batch_max_size: 8192}
+    exporters:
+      kafka/logs:
+        brokers: [redpanda.telemetry.svc.cluster.local:9092]
+        logs:
+          topic: otlp-logs
+          encoding: otlp_json
+        producer: {compression: zstd, required_acks: -1, max_message_bytes: 1000000}
+        sending_queue: {enabled: true, queue_size: 20000, num_consumers: 8, storage: file_storage/queue}
+        retry_on_failure: {enabled: true, max_elapsed_time: 0}
+      prometheus:
+        endpoint: 0.0.0.0:8889
+        resource_to_telemetry_conversion: {enabled: true}
+      otlp/tempo:
+        endpoint: tempo.telemetry.svc.cluster.local:4317
+        tls: {insecure: true}
+        sending_queue: {enabled: true, queue_size: 10000, storage: file_storage/queue}
+        retry_on_failure: {enabled: true, max_elapsed_time: 0}
+    extensions:
+      health_check: {endpoint: 0.0.0.0:13133}
+      file_storage/queue: {directory: /var/lib/otelcol/queue, timeout: 10s}
+    service:
+      extensions: [health_check, file_storage/queue]
+      telemetry: {metrics: {address: 0.0.0.0:8888}}
+      pipelines:
+        logs: {receivers: [otlp], processors: [memory_limiter, transform/redact, filter/debug, batch], exporters: [kafka/logs]}
+        metrics: {receivers: [otlp], processors: [memory_limiter, batch], exporters: [prometheus]}
+        traces: {receivers: [otlp], processors: [memory_limiter, batch], exporters: [otlp/tempo]}

@@ -1,0 +1,82 @@
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: aml-strict-mtls
+  namespace: aml-fraud
+spec:
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: aml-inference-allow-platform
+  namespace: aml-fraud
+spec:
+  selector:
+    matchLabels:
+      app: aml-inference-service
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            namespaces: ["aml-fraud", "platform"]
+      to:
+        - operation:
+            methods: ["POST", "GET"]
+            paths: ["/score", "/health", "/metrics"]
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: aml-inference-dr
+  namespace: aml-fraud
+spec:
+  host: aml-inference-service.aml-fraud.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+    connectionPool:
+      tcp:
+        maxConnections: 100
+      http:
+        http1MaxPendingRequests: 1000
+        maxRequestsPerConnection: 100
+    outlierDetection:
+      consecutive5xxErrors: 5
+      interval: 30s
+      baseEjectionTime: 60s
+  subsets:
+    - name: stable
+      labels:
+        version: v1
+    - name: canary
+      labels:
+        version: v2
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: aml-inference-vs
+  namespace: aml-fraud
+spec:
+  hosts:
+    - aml-inference-service.aml-fraud.svc.cluster.local
+  http:
+    - match:
+        - uri:
+            prefix: /score
+      timeout: 2s
+      retries:
+        attempts: 2
+        perTryTimeout: 500ms
+        retryOn: 5xx,connect-failure,refused-stream
+      route:
+        - destination:
+            host: aml-inference-service.aml-fraud.svc.cluster.local
+            subset: stable
+          weight: 95
+        - destination:
+            host: aml-inference-service.aml-fraud.svc.cluster.local
+            subset: canary
+          weight: 5

@@ -1,0 +1,22 @@
+agent:
+  name: reliability-agent
+  type: specialist
+  version: 1.0.0
+purpose:
+  summary: Evaluate SLI, SLO, error budget, burn rate, latency, availability, and saturation.
+checks:
+  - availability_slo_status
+  - latency_slo_status
+  - error_rate_slo_status
+  - error_budget_remaining
+  - fast_burn_detection
+  - medium_burn_detection
+  - slow_burn_detection
+  - mttr_trend
+  - incident_frequency
+  - alert_noise_score
+outputs:
+  - reliability_score
+  - slo_breach_findings
+  - burn_rate_findings
+  - reliability_recommendations

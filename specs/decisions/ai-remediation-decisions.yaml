@@ -1,0 +1,29 @@
+decision_spec:
+  name: ai-remediation-decisions
+  version: 1.0.0
+decisions:
+  rollback:
+    allowed_if:
+      - deployment_recently_changed
+      - slo_breach_or_fast_burn
+      - rollback_revision_available
+    requires_approval_in:
+      - prod
+  scale_out:
+    allowed_if:
+      - saturation_high
+      - hpa_not_at_max
+      - no_cost_freeze
+    requires_approval_in:
+      - prod
+  create_pull_request:
+    allowed_if:
+      - patch_is_deterministic
+      - tests_can_validate
+      - no_secret_exposure
+    requires_approval_in: []
+forbidden_actions:
+  - delete_production_database
+  - disable_security_policy
+  - expose_secret_values
+  - mutate_prod_without_approval

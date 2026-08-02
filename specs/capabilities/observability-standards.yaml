@@ -1,0 +1,22 @@
+capability:
+  name: observability-standards
+  version: 1.0.0
+  owner: sre-platform
+requirements:
+  required:
+    - service_name
+    - structured_logs
+    - trace_id_correlation
+    - metrics_endpoint
+    - dashboard
+    - alerts
+    - slo_config
+checks:
+  otel_resource_attributes_required: true
+  high_cardinality_detection: true
+  pii_log_detection: true
+  golden_signals_required: true
+outputs:
+  - observability_grade
+  - telemetry_cost_risks
+  - recommendations

@@ -1,0 +1,13 @@
+agent:
+  name: enterprise-event-bus-agent
+  type: specialist
+purpose:
+  summary: Verify transaction-producing services publish governed events to AML/Fraud
+    Kafka topics.
+checks:
+- transaction_event_publication
+- schema_registry_validation
+- dlq
+- pii_tokenization
+- lineage
+- consumer_lag_slo

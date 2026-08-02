@@ -1,0 +1,9 @@
+# Install LitmusChaos using Helm for real usage:
+# helm repo add litmuschaos https://litmuschaos.github.io/litmus-helm/
+# helm upgrade --install litmus litmuschaos/litmus --namespace litmus --create-namespace
+#
+# This file only creates the namespace so the repo can bootstrap consistently before Helm install.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: litmus

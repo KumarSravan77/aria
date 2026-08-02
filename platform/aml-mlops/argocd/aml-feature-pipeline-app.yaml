@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: aml-feature-pipeline
+  namespace: argocd
+spec:
+  project: aml-fraud
+  source:
+    repoURL: https://github.com/example/aria-gitops.git
+    targetRevision: main
+    path: platform/aml-mlops/kubernetes
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: aml-fraud
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+  revisionHistoryLimit: 10

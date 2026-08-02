@@ -1,0 +1,8 @@
+# Install command:
+# helm repo add kedacore https://kedacore.github.io/charts
+# helm repo update
+# helm upgrade --install keda kedacore/keda --namespace keda --create-namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: keda

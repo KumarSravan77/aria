@@ -1,0 +1,42 @@
+name: Reusable ARIA Service Review
+
+on:
+  workflow_call:
+    inputs:
+      service_id:
+        required: true
+        type: string
+      service_profile:
+        required: true
+        type: string
+
+jobs:
+  service-review:
+    name: ARIA service review ${{ inputs.service_id }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install ARIA test/runtime dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pyyaml
+      - name: Run ARIA harness/service review tests
+        run: pytest tests/platform -q
+      - name: Generate service review placeholder
+        run: |
+          mkdir -p artifacts/service-reviews
+          cat > artifacts/service-reviews/${{ inputs.service_id }}-service-review.md <<EOF
+          # ARIA Service Review: ${{ inputs.service_id }}
+
+          Profile: ${{ inputs.service_profile }}
+
+          This workflow validates the service against ARIA CI/CD, Kubernetes, observability, security, reliability, and runbook standards.
+          EOF
+      - name: Upload service review artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.service_id }}-service-review
+          path: artifacts/service-reviews/${{ inputs.service_id }}-service-review.md

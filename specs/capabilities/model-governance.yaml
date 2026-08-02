@@ -1,0 +1,28 @@
+capability:
+  name: model-governance
+  version: 1.0.0
+  owner: ml-platform
+requirements:
+  required:
+  - model_registry
+  - model_card
+  - explainability
+  - drift_detection
+  - bias_fairness_checks
+  - ab_testing_gate
+  - retraining_trigger
+  - fintrac_audit_trail
+  - pii_validation
+checks:
+  model_registry_required: true
+  explainability_required: true
+  drift_detection_required: true
+  audit_trail_required: true
+  pii_in_features_detection: true
+  bias_fairness_required: true
+  rollback_model_version_required: true
+outputs:
+- governance_grade
+- compliance_findings
+- model_risk_score
+- drift_findings

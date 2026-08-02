@@ -1,0 +1,26 @@
+capability:
+  name: transaction-risk-scoring-standards
+  version: 1.0.0
+  summary: Defines real-time AML/Fraud risk scoring controls for each business transaction
+    event.
+required_controls:
+- risk_model_mapping
+- risk_score_response
+- risk_level_thresholds
+- explanation_top_features
+- decision_policy
+- audit_log
+- case_management_handoff
+- model_version_in_response
+- latency_slo
+checks:
+- risk_model_required
+- risk_score_required
+- explainability_required
+- audit_log_required
+- case_handoff_required
+- latency_slo_required
+outputs:
+- risk_scoring_grade
+- model_mapping_findings
+- risk_decision_findings

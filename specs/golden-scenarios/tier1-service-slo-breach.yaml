@@ -1,0 +1,27 @@
+scenario:
+  name: tier1-service-slo-breach
+  service_id: payments-api
+  environment: prod
+fixtures:
+  service_profile: fixtures/payments-api/service-profile.yaml
+  slo_config: fixtures/payments-api/slo.yaml
+  telemetry_snapshot: fixtures/payments-api/telemetry.json
+  incident_history: fixtures/payments-api/incidents.json
+  latest_drift_summary: fixtures/payments-api/drift-summary.json
+expected:
+  findings:
+    must_include:
+      - category: reliability
+        severity: P1
+        title_contains: SLO breached
+      - category: reliability
+        severity: P1
+        title_contains: Error budget
+    must_not_include:
+      - category: terraform
+        title_contains: Run drift scan
+  score_expectations:
+    reliability_score_max: B
+    operational_readiness_max: B
+  approval_expectations:
+    approval_required: true

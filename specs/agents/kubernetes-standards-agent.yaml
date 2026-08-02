@@ -1,0 +1,22 @@
+agent:
+  name: kubernetes-standards-agent
+  type: specialist
+  version: 1.0.0
+purpose:
+  summary: Validate workloads against Kubernetes production standards.
+checks:
+  - probes
+  - requests_limits
+  - hpa_vpa_keda
+  - pdb
+  - topology_spread
+  - affinity_anti_affinity
+  - taints_tolerations
+  - network_policy
+  - security_context
+  - rbac
+  - service_mesh
+outputs:
+  - kubernetes_maturity_score
+  - kubernetes_findings
+  - remediation_candidates

@@ -1,0 +1,31 @@
+models:
+- name: payments-aml-risk-model
+  applies_to:
+  - payments-api
+  model_registry: mlflow
+  serving: kserve
+  thresholds:
+    low: 0.3
+    medium: 0.65
+    high: 0.85
+  required_explanations: true
+- name: ecommerce-fraud-risk-model
+  applies_to:
+  - orders-api
+  model_registry: mlflow
+  serving: kserve
+  thresholds:
+    low: 0.25
+    medium: 0.6
+    high: 0.8
+  required_explanations: true
+- name: aml-enterprise-default-risk-model
+  applies_to:
+  - '*'
+  model_registry: mlflow
+  serving: kserve
+  thresholds:
+    low: 0.35
+    medium: 0.7
+    high: 0.9
+  required_explanations: true

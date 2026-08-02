@@ -1,0 +1,72 @@
+[
+  {
+    "id": "rb-checkout-canary",
+    "type": "runbook",
+    "service": "checkout-api",
+    "domain": "retail_ecommerce",
+    "title": "Checkout Canary Regression",
+    "content": "If checkout-api 5xx increases after canary traffic shift, inspect Istio VirtualService, Argo Rollouts, p95 latency and deployment revision. Safe action is pause rollout or rollback after approval.",
+    "tags": [
+      "istio",
+      "canary",
+      "5xx",
+      "rollback"
+    ]
+  },
+  {
+    "id": "rb-fraud-kafka-lag",
+    "type": "runbook",
+    "service": "fraud-detection-engine",
+    "domain": "aml_fraud",
+    "title": "Fraud Kafka Lag",
+    "content": "For fraud-detection-engine consumer lag, check consumer group lag, rebalance events, consumer pod restarts, downstream DB latency and recent deployment. Safe action is scale consumers or rollback after approval.",
+    "tags": [
+      "kafka",
+      "consumer lag",
+      "rebalance",
+      "fraud"
+    ]
+  },
+  {
+    "id": "rca-trade-rebalance",
+    "type": "rca",
+    "service": "trade-execution-api",
+    "domain": "capital_markets",
+    "title": "Trade Rebalance RCA",
+    "content": "Deployment caused consumer restarts and Kafka rebalance, increasing order latency during market open. Recovery was pausing rollout and restoring stable replicas.",
+    "tags": [
+      "kafka",
+      "rebalance",
+      "trading",
+      "latency"
+    ]
+  },
+  {
+    "id": "rb-payment-db-timeout",
+    "type": "runbook",
+    "service": "payment-processing-api",
+    "domain": "retail_banking",
+    "title": "Payment DB Timeout",
+    "content": "For payment database timeouts, inspect DB pool saturation, slow SQL, dependency errors and SLO burn. Production changes require payment owner approval.",
+    "tags": [
+      "payment",
+      "database",
+      "timeout",
+      "slo"
+    ]
+  },
+  {
+    "id": "rb-k8s-oom",
+    "type": "runbook",
+    "service": "document-processing-ai",
+    "domain": "insurance",
+    "title": "Kubernetes OOMKilled",
+    "content": "For OOMKilled pods, check memory limits, node pressure, previous logs, VPA recommendations and image changes. Avoid blind limit increases without validation.",
+    "tags": [
+      "kubernetes",
+      "oomkilled",
+      "vpa",
+      "memory"
+    ]
+  }
+]

@@ -1,0 +1,14 @@
+# Litmus RBAC note:
+# Real Litmus installation through Helm creates the required CRDs, experiment pods,
+# and service accounts. This repo keeps the ChaosEngine manifests lightweight.
+# For real usage:
+#   helm repo add litmuschaos https://litmuschaos.github.io/litmus-helm/
+#   helm upgrade --install litmus litmuschaos/litmus -n litmus --create-namespace
+#   kubectl get chaosengines -A
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: litmus-rbac-notes
+  namespace: litmus
+data:
+  note: "Install Litmus via Helm before applying ChaosEngine manifests."

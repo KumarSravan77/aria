@@ -1,0 +1,50 @@
+[
+  {
+    "transaction_id": "txn-1001",
+    "amount": 245.7,
+    "currency": "CAD",
+    "sender_country": "CA",
+    "receiver_country": "CA",
+    "transaction_type": "e_transfer",
+    "velocity_1h": 2,
+    "is_fraud_label": false,
+    "model_score": 0.08,
+    "explanation_top_features": [
+      "low_amount",
+      "domestic_transfer",
+      "normal_velocity"
+    ]
+  },
+  {
+    "transaction_id": "txn-1002",
+    "amount": 9850.0,
+    "currency": "CAD",
+    "sender_country": "CA",
+    "receiver_country": "NG",
+    "transaction_type": "wire",
+    "velocity_1h": 9,
+    "is_fraud_label": true,
+    "model_score": 0.92,
+    "explanation_top_features": [
+      "high_amount",
+      "high_velocity",
+      "high_risk_corridor"
+    ]
+  },
+  {
+    "transaction_id": "txn-1003",
+    "amount": 1500.0,
+    "currency": "USD",
+    "sender_country": "CA",
+    "receiver_country": "US",
+    "transaction_type": "card_not_present",
+    "velocity_1h": 5,
+    "is_fraud_label": false,
+    "model_score": 0.31,
+    "explanation_top_features": [
+      "cross_border",
+      "medium_velocity",
+      "known_customer"
+    ]
+  }
+]

@@ -1,0 +1,23 @@
+capability:
+  name: cicd-standards
+  version: 1.0.0
+  owner: developer-platform
+requirements:
+  required:
+    - build
+    - unit_tests
+    - security_scan
+    - container_scan
+    - artifact_publish
+    - deployment_manifest_validation
+    - rollback_strategy
+checks:
+  sast_required: true
+  sca_required: true
+  secret_scan_required: true
+  sbom_required: true
+  deployment_approval_for_prod: true
+outputs:
+  - pipeline_grade
+  - missing_controls
+  - reusable_workflow_recommendations

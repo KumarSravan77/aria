@@ -1,0 +1,19 @@
+{
+  "incident_id": "INC-LOCAL-001",
+  "service": "checkout-api",
+  "environment": "dev",
+  "severity": "P2",
+  "symptoms": ["high latency", "increased 5xx"],
+  "signals": {
+    "p95_latency_ms": 1800,
+    "error_rate_percent": 7,
+    "cpu_percent": 88,
+    "recent_deployment": true,
+    "namespace": "demo"
+  },
+  "user": {
+    "id": "local-sre",
+    "role": "sre",
+    "team": "payments"
+  }
+}

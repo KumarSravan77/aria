@@ -1,0 +1,14 @@
+schema:
+  name: remediation
+  version: 1.0.0
+properties:
+  id: string
+  finding_id: string
+  type:
+    enum: [manual, patch, pull_request, runbook, rollback, scale, config_change]
+  safety:
+    dry_run_required: boolean
+    approval_required: boolean
+    rollback_required: boolean
+  steps:
+    type: list

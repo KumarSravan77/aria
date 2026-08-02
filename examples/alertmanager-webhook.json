@@ -1,0 +1,21 @@
+{
+  "receiver": "incident-investigator",
+  "status": "firing",
+  "alerts": [
+    {
+      "status": "firing",
+      "labels": {
+        "alertname": "CheckoutHighLatency",
+        "service": "checkout-api",
+        "environment": "dev",
+        "severity": "critical",
+        "team": "payments"
+      },
+      "annotations": {
+        "summary": "checkout-api p95 latency is above threshold",
+        "description": "p95 latency above 1200ms for 5 minutes"
+      },
+      "startsAt": "2026-05-15T20:14:00Z"
+    }
+  ]
+}

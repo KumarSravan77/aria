@@ -1,0 +1,21 @@
+capability:
+  name: reliability-standards
+  version: 1.0.0
+  owner: sre
+requirements:
+  required:
+    - availability_slo
+    - latency_slo
+    - error_rate_slo
+    - error_budget_policy
+    - alert_policy
+checks:
+  fast_burn_detection: true
+  medium_burn_detection: true
+  slow_burn_detection: true
+  mttr_tracking: true
+  incident_trend_tracking: true
+outputs:
+  - reliability_score
+  - slo_findings
+  - burn_rate_findings

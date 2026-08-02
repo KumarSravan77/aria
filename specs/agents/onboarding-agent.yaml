@@ -1,0 +1,20 @@
+agent:
+  name: onboarding-agent
+  type: orchestrator
+  version: 1.0.0
+purpose:
+  summary: Onboard a new service into ARIA platform standards and generate initial baselines.
+runs_agents:
+  - app-discovery-agent
+  - kubernetes-standards-agent
+  - cicd-standards-agent
+  - observability-standards-agent
+  - security-governance-agent
+  - reliability-agent
+  - terraform-drift-agent
+outputs:
+  - onboarding_report
+  - generated_platform_templates
+  - service_baseline
+  - initial_scorecard
+  - required_fixes_before_production

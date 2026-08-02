@@ -1,0 +1,26 @@
+{
+  "pages": [
+    {
+      "page_id": "12345",
+      "space": "SRE",
+      "title": "Checkout API High Latency Runbook",
+      "labels": ["runbook", "checkout-api", "payments"],
+      "service": "checkout-api",
+      "team": "payments",
+      "doc_type": "runbook",
+      "last_updated": "2026-05-15",
+      "body": "Service: checkout-api\nTeam: payments\nRunbook steps: check Prometheus p95 latency, 5xx error rate, pod CPU, recent deployment, database timeout logs, and downstream payment service latency. Mitigation: scale deployment in dev, request approval for prod scale or rollback."
+    },
+    {
+      "page_id": "67890",
+      "space": "PLATFORM",
+      "title": "Kubernetes CrashLoopBackOff SOP",
+      "labels": ["sop", "kubernetes-platform", "platform"],
+      "service": "kubernetes-platform",
+      "team": "platform",
+      "doc_type": "sop",
+      "last_updated": "2026-05-15",
+      "body": "Service: kubernetes-platform\nTeam: platform\nCheck previous logs, describe pod, inspect events, validate configmap/secret mounts, and rollback if the new image crashes repeatedly."
+    }
+  ]
+}

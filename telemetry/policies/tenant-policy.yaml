@@ -1,0 +1,12 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata: {name: require-telemetry-tenant}
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: require-tenant-label
+      match: {any: [{resources: {kinds: [Namespace], selector: {matchLabels: {telemetry.aria.io/export: "true"}}}}]}
+      validate:
+        message: Exporting namespaces require telemetry.aria.io/tenant.
+        pattern: {metadata: {labels: {telemetry.aria.io/tenant: "?*"}}}

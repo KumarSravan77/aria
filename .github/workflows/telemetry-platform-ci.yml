@@ -1,0 +1,31 @@
+name: telemetry-platform-ci
+on:
+  pull_request:
+    paths: ["telemetry/**", "server/telemetry/**", "server/agents/telemetry_pipeline_agent.py", "tests/test_telemetry*", ".github/workflows/telemetry-platform-ci.yml"]
+  push:
+    branches: [main]
+    paths: ["telemetry/**", "server/telemetry/**", "server/agents/telemetry_pipeline_agent.py", "tests/test_telemetry*"]
+permissions: {contents: read}
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11", cache: pip}
+      - run: pip install -r server/requirements.txt
+      - run: pytest tests/test_telemetry_platform.py tests/test_telemetry_assets.py -q
+      - uses: azure/setup-kubectl@v4
+        with: {version: v1.31.0}
+      - run: kubectl kustomize telemetry/overlays/local > /tmp/aria-telemetry.yaml
+      - run: test -s /tmp/aria-telemetry.yaml
+      - uses: helm/kind-action@v1
+        with: {install_only: true}
+      - run: helm dependency build telemetry/helm
+      - run: helm lint telemetry/helm
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aquasecurity/trivy-action@0.28.0
+        with: {scan-type: fs, scan-ref: ., severity: HIGH,CRITICAL, exit-code: "1"}

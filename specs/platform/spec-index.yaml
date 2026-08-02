@@ -1,0 +1,39 @@
+spec_index:
+  version: 1.0.0
+  agents:
+  - specs/agents/service-review-agent.yaml
+  - specs/agents/onboarding-agent.yaml
+  - specs/agents/secret-governance-agent.yaml
+  - specs/agents/devsecops-agent.yaml
+  - specs/agents/enterprise-event-bus-agent.yaml
+  - specs/agents/transaction-risk-scoring-agent.yaml
+  capabilities:
+  - specs/capabilities/kubernetes-standards.yaml
+  - specs/capabilities/observability-standards.yaml
+  - specs/capabilities/cicd-standards.yaml
+  - specs/capabilities/reliability-standards.yaml
+  - specs/capabilities/secrets-standards.yaml
+  - specs/capabilities/data-pipeline-standards.yaml
+  - specs/capabilities/model-governance.yaml
+  - specs/capabilities/service-mesh-standards.yaml
+  - specs/capabilities/gitops-standards.yaml
+  - specs/capabilities/enterprise-event-bus-standards.yaml
+  - specs/capabilities/transaction-risk-scoring-standards.yaml
+  - specs/capabilities/devsecops-standards.yaml
+  golden_paths:
+  - specs/golden-paths/java-springboot-tier1.yaml
+  - specs/golden-paths/python-ai-service.yaml
+  - specs/golden-paths/python-aml-mlops.yaml
+  policies:
+  - specs/policies/production-governance.yaml
+  - specs/policies/secrets-governance.yaml
+  decisions:
+  - specs/decisions/ai-remediation-decisions.yaml
+  remediations:
+  - specs/remediations/kubernetes-remediations.yaml
+  - specs/remediations/secrets-remediations.yaml
+  - specs/remediations/mlops-remediations.yaml
+  workflows:
+  - specs/workflows/service-review-workflow.yaml
+  - specs/workflows/onboarding-workflow.yaml
+  - specs/workflows/mlops-deployment-workflow.yaml

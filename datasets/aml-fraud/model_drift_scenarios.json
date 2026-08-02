@@ -1,0 +1,42 @@
+[
+  {
+    "id": "feature_distribution_shift",
+    "signals": [
+      "amount_mean_shift",
+      "receiver_country_distribution_change"
+    ],
+    "expected_root_cause": "new fraud corridor increased high-value transfers",
+    "safe_remediation": [
+      "raise_monitoring_sampling",
+      "review_feature_baseline",
+      "open_ml_retraining_ticket"
+    ]
+  },
+  {
+    "id": "concept_drift",
+    "signals": [
+      "false_negative_rate_increase",
+      "fraud_pattern_change"
+    ],
+    "expected_root_cause": "fraudsters changed transaction velocity pattern",
+    "safe_remediation": [
+      "rollback_if_model_regression",
+      "trigger_retraining",
+      "require_model_risk_approval"
+    ]
+  },
+  {
+    "id": "data_quality_degradation",
+    "signals": [
+      "null_rate_increase",
+      "schema_mismatch",
+      "late_arriving_events"
+    ],
+    "expected_root_cause": "upstream transaction feed schema drift",
+    "safe_remediation": [
+      "quarantine_bad_records",
+      "pause_training",
+      "notify_data_owner"
+    ]
+  }
+]

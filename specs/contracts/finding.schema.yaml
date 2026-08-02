@@ -1,0 +1,37 @@
+schema:
+  name: finding
+  version: 1.0.0
+required:
+  - id
+  - title
+  - category
+  - severity
+  - evidence
+  - impact
+  - recommendation
+  - confidence
+properties:
+  id: string
+  title: string
+  category:
+    enum: [reliability, kubernetes, observability, security, cicd, cost, terraform, runbook, onboarding]
+  severity:
+    enum: [P0, P1, P2, P3, INFO]
+  evidence:
+    type: list
+    item:
+      source: string
+      path: string
+      observed: string
+      expected: string
+  impact:
+    user_impact: string
+    business_impact: string
+    technical_impact: string
+  recommendation:
+    summary: string
+    remediation_type:
+      enum: [manual, auto_fix_candidate, approval_required]
+  confidence:
+    score: number
+    explanation: string

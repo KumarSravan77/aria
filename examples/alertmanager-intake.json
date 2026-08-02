@@ -1,0 +1,33 @@
+{
+  "incident_id": "INC-2026-002",
+  "service": "checkout-api",
+  "environment": "dev",
+  "severity": "P1",
+  "source": "alertmanager",
+  "alert_name": "CheckoutHighLatency",
+  "symptoms": [
+    "p95 latency above 2 seconds",
+    "5xx error rate increased",
+    "checkout requests timing out"
+  ],
+  "signals": {
+    "p95_latency_ms": 3800,
+    "error_rate_percent": 7.5,
+    "cpu_percent": 88,
+    "recent_deployment": true,
+    "slow_dependency": "payment-db"
+  },
+  "labels": {
+    "team": "payments",
+    "service": "checkout-api"
+  },
+  "annotations": {
+    "summary": "Checkout API latency is above threshold",
+    "dashboard": "http://localhost:3000"
+  },
+  "user": {
+    "id": "local-sre",
+    "role": "sre",
+    "team": "payments"
+  }
+}

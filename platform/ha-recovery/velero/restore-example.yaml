@@ -1,0 +1,9 @@
+apiVersion: velero.io/v1
+kind: Restore
+metadata:
+  name: checkout-api-restore
+  namespace: velero
+spec:
+  backupName: checkout-api-daily-backup
+  includedNamespaces:
+    - demo

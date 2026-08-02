@@ -1,0 +1,21 @@
+agent:
+  name: otel-guardian-agent
+  type: specialist
+  version: 1.0.0
+purpose:
+  summary: Audit OpenTelemetry instrumentation quality, cost readiness, and security posture.
+checks:
+  - service_name
+  - resource_attributes
+  - trace_context_propagation
+  - span_semantic_conventions
+  - high_cardinality_attributes
+  - pii_in_telemetry
+  - exporter_configuration
+  - collector_pipeline_efficiency
+  - sampling_strategy
+outputs:
+  - otel_grade
+  - instrumentation_findings
+  - cost_impact
+  - pr_fix_candidates

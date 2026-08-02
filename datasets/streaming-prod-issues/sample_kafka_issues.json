@@ -1,0 +1,53 @@
+[
+  {
+    "id": "kafka-lag-fraud-001",
+    "title": "Fraud detection consumer lag spike",
+    "service": "fraud-detection-engine",
+    "severity": "P1",
+    "signals": [
+      "kafka",
+      "consumer lag",
+      "streaming",
+      "fraud_detection_delay"
+    ],
+    "topic": "transactions.stream",
+    "consumer_group": "fraud-detection-engine",
+    "expected_root_cause": "consumer_lag_growth_after_deployment",
+    "safe_remediation": "rollback_consumer_deployment_or_scale_consumers",
+    "training_only": true
+  },
+  {
+    "id": "kafka-rebalance-trading-001",
+    "title": "Trade execution rebalance storm after rollout",
+    "service": "trade-execution-api",
+    "severity": "P1",
+    "signals": [
+      "kafka",
+      "rebalance",
+      "deployment",
+      "latency"
+    ],
+    "topic": "orders.submitted",
+    "consumer_group": "trade-execution-api",
+    "expected_root_cause": "deployment_triggered_consumer_rebalance",
+    "safe_remediation": "pause_rollout_or_rollback",
+    "training_only": true
+  },
+  {
+    "id": "kafka-partition-skew-payments-001",
+    "title": "Payment topic hot partition",
+    "service": "payment-processing-api",
+    "severity": "P2",
+    "signals": [
+      "kafka",
+      "partition skew",
+      "hot partition",
+      "payment_latency"
+    ],
+    "topic": "payments.requested",
+    "consumer_group": "payment-processing-api",
+    "expected_root_cause": "partition_skew_or_hot_key",
+    "safe_remediation": "review_partition_key_and_scale_consumers",
+    "training_only": true
+  }
+]

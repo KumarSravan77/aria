@@ -1,0 +1,10 @@
+{
+  "service": "checkout-api",
+  "experiment": "pod-delete",
+  "incident_created": true,
+  "alert_fired": true,
+  "healing_succeeded": true,
+  "rag_sources": 5,
+  "mttr_seconds": 42,
+  "slo_burn_observed": true
+}

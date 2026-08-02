@@ -1,0 +1,7 @@
+image:
+  repository: aria
+  tag: local
+  pullPolicy: IfNotPresent
+service:
+  port: 8080
+replicaCount: 1

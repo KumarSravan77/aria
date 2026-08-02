@@ -1,0 +1,5 @@
+{
+  "service_id": "payments-api",
+  "mode": "service_review",
+  "evaluate_specs": true
+}

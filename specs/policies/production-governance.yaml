@@ -1,0 +1,19 @@
+policy:
+  name: production-governance
+  version: 1.0.0
+mutation_rules:
+  production:
+    dry_run_required: true
+    approval_required: true
+    rollback_required: true
+    blast_radius_required: true
+    disallow_direct_mutation: true
+  non_production:
+    dry_run_required: true
+    approval_required: false
+    rollback_required: true
+release_gates:
+  block_on_p0: true
+  block_on_critical_security: true
+  block_on_missing_slo: true
+  block_on_failed_tests: true

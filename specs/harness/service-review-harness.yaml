@@ -1,0 +1,15 @@
+harness:
+  name: service-review-harness
+  version: 1.0.0
+contract:
+  agent_spec: specs/agents/service-review-agent.yaml
+  finding_schema: specs/contracts/finding.schema.yaml
+execution:
+  mode: deterministic
+  fail_on_schema_error: true
+  fail_on_missing_expected_finding: true
+rules:
+  - service_review_must_not_execute_terraform_drift
+  - service_review_may_consume_latest_drift_summary
+  - reliability_breach_must_create_p1_or_p0
+  - error_budget_exhaustion_must_require_approval

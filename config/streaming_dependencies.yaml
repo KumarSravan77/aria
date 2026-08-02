@@ -1,0 +1,37 @@
+streaming_dependencies:
+  trade-execution-api:
+    topics:
+      produces: [orders.submitted, executions.completed]
+      consumes: [marketdata.prices, risk.limits]
+    consumer_groups: [trade-execution-api]
+    criticality: tier_0
+  market-data-service:
+    topics:
+      produces: [marketdata.prices, marketdata.reference]
+      consumes: [exchange.raw.feed]
+    consumer_groups: [market-data-service]
+    criticality: tier_0
+  payment-processing-api:
+    topics:
+      produces: [payments.authorized, payments.failed]
+      consumes: [payments.requested]
+    consumer_groups: [payment-processing-api]
+    criticality: tier_0
+  fraud-detection-engine:
+    topics:
+      produces: [fraud.score.completed]
+      consumes: [transactions.stream, payments.authorized]
+    consumer_groups: [fraud-detection-engine]
+    criticality: tier_0
+  transaction-monitoring-service:
+    topics:
+      produces: [aml.alerts]
+      consumes: [transactions.stream]
+    consumer_groups: [transaction-monitoring-service]
+    criticality: tier_0
+  checkout-api:
+    topics:
+      produces: [checkout.completed, checkout.failed]
+      consumes: [inventory.updated]
+    consumer_groups: [checkout-api]
+    criticality: tier_1

@@ -1,0 +1,21 @@
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosEngine
+metadata:
+  name: checkout-dns-failure
+  namespace: demo
+spec:
+  appinfo:
+    appns: demo
+    applabel: app=checkout-api
+    appkind: deployment
+  chaosServiceAccount: litmus-admin
+  engineState: active
+  experiments:
+    - name: pod-dns-error
+      spec:
+        components:
+          env:
+            - name: TOTAL_CHAOS_DURATION
+              value: "45"
+            - name: TARGET_HOSTNAMES
+              value: "kubernetes.default.svc.cluster.local"

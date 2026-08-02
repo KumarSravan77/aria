@@ -1,0 +1,19 @@
+workflow:
+  name: service-review
+  version: 1.0.0
+steps:
+  - load_service_profile
+  - resolve_golden_path
+  - run_reliability_agent
+  - run_kubernetes_standards_agent
+  - run_observability_standards_agent
+  - run_cicd_standards_agent
+  - consume_latest_drift_summary_if_available
+  - normalize_findings
+  - apply_policy_gates
+  - generate_report
+outputs:
+  - operational_readiness_report
+  - scorecard
+  - remediation_backlog
+  - approval_required_actions

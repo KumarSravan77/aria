@@ -1,0 +1,27 @@
+capability:
+  name: kubernetes-standards
+  version: 1.0.0
+  owner: platform-engineering
+  description: Required Kubernetes runtime controls for onboarded services.
+requirements:
+  required:
+    - deployment_strategy
+    - liveness_probe
+    - readiness_probe
+    - resource_requests_limits
+    - pod_disruption_budget
+    - horizontal_pod_autoscaler
+    - network_policy
+    - security_context
+    - service_account
+    - topology_spread_or_anti_affinity
+checks:
+  probes_required: true
+  pdb_required_for_tier1: true
+  hpa_required_for_stateless_services: true
+  network_policy_required: true
+  privileged_containers_allowed: false
+outputs:
+  - findings
+  - score
+  - remediation_candidates

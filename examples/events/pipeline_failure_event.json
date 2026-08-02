@@ -1,0 +1,35 @@
+{
+  "event_type": "pipeline_failure",
+  "service_id": "payments-api",
+  "environment": "stage",
+  "severity": "P2",
+  "source": "github-actions",
+  "summary": "Container scan failed due to critical vulnerability in base image",
+  "signals": {
+    "failed_stage": "security",
+    "tool": "trivy",
+    "critical_vulnerabilities": 1
+  },
+  "context": {
+    "service_profile": {
+      "service_id": "payments-api",
+      "language": "java",
+      "cicd": {
+        "provider": "github-actions",
+        "build": true,
+        "unit_tests": true,
+        "security_scan": false,
+        "sbom": false,
+        "rollback": true
+      },
+      "kubernetes": {
+        "readinessProbe": true,
+        "livenessProbe": true,
+        "pdb": true
+      },
+      "observability": {
+        "otel_enabled": true
+      }
+    }
+  }
+}

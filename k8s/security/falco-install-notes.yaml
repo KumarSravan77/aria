@@ -1,0 +1,8 @@
+# Install command:
+# helm repo add falcosecurity https://falcosecurity.github.io/charts
+# helm repo update
+# helm upgrade --install falco falcosecurity/falco -n falco --create-namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: falco

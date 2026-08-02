@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Enterprise Transaction Event v1",
+  "type": "object",
+  "required": [
+    "event_id",
+    "service_id",
+    "transaction_id",
+    "transaction_type",
+    "amount",
+    "currency",
+    "customer_id_token",
+    "event_time",
+    "idempotency_key"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string"
+    },
+    "service_id": {
+      "type": "string"
+    },
+    "transaction_id": {
+      "type": "string"
+    },
+    "transaction_type": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "number"
+    },
+    "currency": {
+      "type": "string"
+    },
+    "customer_id_token": {
+      "type": "string"
+    },
+    "sender_country": {
+      "type": "string"
+    },
+    "receiver_country": {
+      "type": "string"
+    },
+    "device_id_token": {
+      "type": "string"
+    },
+    "velocity_1h": {
+      "type": "number"
+    },
+    "event_time": {
+      "type": "string"
+    },
+    "idempotency_key": {
+      "type": "string"
+    },
+    "lineage": {
+      "type": "object"
+    }
+  }
+}

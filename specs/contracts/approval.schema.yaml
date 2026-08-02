@@ -1,0 +1,9 @@
+schema:
+  name: approval
+  version: 1.0.0
+properties:
+  required: boolean
+  reason: string
+  approver_role: string
+  risk_level:
+    enum: [low, medium, high, critical]

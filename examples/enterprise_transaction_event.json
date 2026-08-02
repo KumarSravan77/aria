@@ -1,0 +1,17 @@
+{
+  "event_id": "evt-1001",
+  "service_id": "payments-api",
+  "transaction_id": "txn-1001",
+  "transaction_type": "wire_transfer",
+  "amount": 42000,
+  "currency": "CAD",
+  "customer_id_token": "tok_customer_123",
+  "sender_country": "CA",
+  "receiver_country": "RU",
+  "device_id_token": "tok_device_456",
+  "velocity_1h": 7,
+  "new_device": true,
+  "event_time": "2026-05-24T12:00:00Z",
+  "idempotency_key": "payments-api:txn-1001",
+  "lineage": {"source_application": "payments-api", "schema_version": "transaction-event-v1"}
+}

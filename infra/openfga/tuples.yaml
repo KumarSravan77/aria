@@ -1,0 +1,21 @@
+# Example tuples for OpenFGA.
+# These mirror server/authz/relationships.yaml.
+tuples:
+  - user: user:test-sre
+    relation: member
+    object: team:platform
+  - user: user:test-commander
+    relation: member
+    object: team:platform
+  - user: team:platform
+    relation: owner
+    object: service:checkout-api
+  - user: team:payments
+    relation: owner
+    object: service:checkout-api
+  - user: service:checkout-api
+    relation: parent_service
+    object: incident:INC-2026-001
+  - user: service:checkout-api
+    relation: parent_service
+    object: runbook:high-api-latency

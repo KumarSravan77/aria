@@ -1,0 +1,7 @@
+# Local OpenFGA can run through docker compose --profile authz.
+# For Kubernetes, deploy OpenFGA using its Helm chart or official manifests,
+# then load infra/openfga/model.fga and infra/openfga/tuples.yaml.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: openfga

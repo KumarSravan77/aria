@@ -1,0 +1,12 @@
+{
+  "resource_changes": [
+    {
+      "address": "aws_security_group.payments_api",
+      "change": {"actions": ["update"]}
+    },
+    {
+      "address": "aws_cloudwatch_metric_alarm.cpu_high",
+      "change": {"actions": ["create"]}
+    }
+  ]
+}

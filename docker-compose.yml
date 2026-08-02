@@ -1,0 +1,130 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: incidentdb
+      POSTGRES_USER: incident
+      POSTGRES_PASSWORD: incident
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  chroma:
+    image: chromadb/chroma:0.5.23
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+
+  mattermost:
+    image: mattermost/mattermost-team-edition:9.11
+    ports:
+      - "8065:8065"
+    environment:
+      MM_SQLSETTINGS_DRIVERNAME: postgres
+      MM_SQLSETTINGS_DATASOURCE: postgres://incident:incident@postgres:5432/incidentdb?sslmode=disable&connect_timeout=10
+      MM_SERVICESETTINGS_SITEURL: http://localhost:8065
+    depends_on:
+      - postgres
+    profiles: ["collab"]
+
+  checkout-api:
+    build: ./apps/sample-checkout-api
+    environment:
+      CHAOS_LATENCY_MS: "0"
+      CHAOS_ERROR_RATE: "0"
+    ports:
+      - "9000:9000"
+
+  aria-api:
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    environment:
+      CHROMA_HOST: chroma
+      CHROMA_PORT: "8000"
+      DOCS_PATH: /app/docs
+      SELF_HEALING_ENABLED: "true"
+      KUBERNETES_MODE: "local"
+      DATABASE_URL: postgresql+psycopg2://incident:incident@postgres:5432/incidentdb
+      REDIS_URL: redis://redis:6379/0
+      COLLABORATION_PROVIDER: stdout
+      OTEL_ENABLED: "false"
+      OLLAMA_BASE_URL: http://ollama:11434
+      OPENFGA_API_URL: http://openfga:8080
+      LOKI_URL: http://loki:3100
+      TEMPO_URL: http://tempo:3200
+    ports:
+      - "8080:8080"
+    depends_on:
+      - chroma
+      - postgres
+      - redis
+
+  worker:
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    command: celery -A server.workers.celery_app.celery_app worker --loglevel=INFO
+    environment:
+      DATABASE_URL: postgresql+psycopg2://incident:incident@postgres:5432/incidentdb
+      REDIS_URL: redis://redis:6379/0
+      CHROMA_HOST: chroma
+      CHROMA_PORT: "8000"
+      DOCS_PATH: /app/docs
+    depends_on:
+      - aria-api
+      - redis
+      - postgres
+      - chroma
+
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    profiles: ["ai"]
+
+  openfga:
+    image: openfga/openfga:latest
+    command: run
+    environment:
+      OPENFGA_DATASTORE_ENGINE: memory
+      OPENFGA_LOG_FORMAT: json
+    ports:
+      - "8081:8080"
+      - "8082:8081"
+    profiles: ["authz"]
+
+  loki:
+    image: grafana/loki:3.0.0
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - "3100:3100"
+    profiles: ["observability"]
+
+  tempo:
+    image: grafana/tempo:2.5.0
+    command: ["-config.file=/etc/tempo.yaml"]
+    ports:
+      - "3200:3200"
+    volumes:
+      - ./k8s/observability/tempo-local.yaml:/etc/tempo.yaml:ro
+    profiles: ["observability"]
+
+volumes:
+  chroma_data:
+  postgres_data:
+  ollama_data:

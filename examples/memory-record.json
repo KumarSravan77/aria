@@ -1,0 +1,1 @@
+{"service":"checkout-api","incident_id":"INC-2026-002","outcome":"mitigated","remediation":"scaled deployment to 3 replicas"}

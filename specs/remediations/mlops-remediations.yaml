@@ -1,0 +1,34 @@
+remediation_spec:
+  name: mlops-remediations
+  version: 1.0.0
+remediations:
+  model_drift_detected:
+    allowed_actions:
+    - rollback_to_previous_registry_version
+    - create_retraining_ticket
+    - alert_ml_team
+    - increase_monitoring_sampling
+    blocked_actions:
+    - auto_promote_new_model_without_approval
+    approval_required: true
+  feature_store_lag:
+    allowed_actions:
+    - scale_pipeline_workers
+    - flush_feature_cache
+    - replay_failed_partitions
+    - create_pr_patch
+    approval_required: false
+  training_pipeline_failure:
+    allowed_actions:
+    - retry_with_exponential_backoff
+    - collect_training_logs
+    - notify_ml_team
+    - open_incident_ticket
+    approval_required: false
+  data_schema_drift:
+    allowed_actions:
+    - quarantine_new_data
+    - pause_inference_if_high_risk
+    - alert_data_owner
+    - create_schema_compatibility_pr
+    approval_required: true

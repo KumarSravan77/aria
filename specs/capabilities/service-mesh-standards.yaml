@@ -1,0 +1,53 @@
+capability:
+  name: service-mesh-standards
+  version: 1.0.0
+  category: platform
+  description: Enterprise Istio/service-mesh standards for secure traffic, rollout safety, and service-to-service telemetry.
+
+applies_to:
+  runtimes:
+    - kubernetes
+  mesh:
+    - istio
+
+checks:
+  - name: istio_injection_enabled
+    severity: P1
+    expected: Namespace or workload has Istio sidecar injection enabled where mesh is required.
+  - name: mtls_required
+    severity: P0
+    expected: PeerAuthentication enforces STRICT mTLS for production workloads.
+  - name: authorization_policy_required
+    severity: P0
+    expected: AuthorizationPolicy restricts service-to-service access by identity and namespace.
+  - name: virtual_service_required
+    severity: P1
+    expected: VirtualService defines controlled routing for inference/API traffic.
+  - name: destination_rule_required
+    severity: P1
+    expected: DestinationRule defines subsets, connection pool, outlier detection, and TLS policy.
+  - name: retry_timeout_required
+    severity: P1
+    expected: Retries, timeouts, and circuit-breaker/outlier-detection policies are configured.
+  - name: canary_traffic_policy_required
+    severity: P1
+    expected: Canary traffic split is available for model/API rollout safety.
+  - name: mesh_telemetry_required
+    severity: P1
+    expected: Istio telemetry is exported to OpenTelemetry/Prometheus/Dynatrace.
+  - name: fault_injection_test_defined
+    severity: P2
+    expected: Fault-injection/resilience test is defined for non-production validation.
+
+outputs:
+  - service_mesh_grade
+  - mesh_security_findings
+  - rollout_safety_findings
+  - telemetry_findings
+  - remediation_candidates
+
+production_gates:
+  block_on_missing_mtls: true
+  block_on_missing_authorization_policy: true
+  block_on_missing_telemetry: true
+  require_canary_for_model_rollout: true

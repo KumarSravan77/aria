@@ -1,0 +1,73 @@
+[
+  {
+    "id": "k8s-crashloop-001",
+    "title": "CrashLoopBackOff after deployment",
+    "symptoms": [
+      "CrashLoopBackOff",
+      "restart_count_high",
+      "previous_logs_error"
+    ],
+    "root_cause": "application_startup_failure",
+    "safe_remediation": "rollback_or_fix_config",
+    "severity": "P2",
+    "service": "checkout-api",
+    "training_only": true
+  },
+  {
+    "id": "k8s-oom-001",
+    "title": "OOMKilled due to memory limit",
+    "symptoms": [
+      "OOMKilled",
+      "memory_limit_reached",
+      "node_memory_pressure"
+    ],
+    "root_cause": "memory_limit_too_low_or_memory_leak",
+    "safe_remediation": "increase_memory_limit_or_rollback",
+    "severity": "P2",
+    "service": "payment-processing-api",
+    "training_only": true
+  },
+  {
+    "id": "k8s-pending-001",
+    "title": "Pending pod due to unschedulable resources",
+    "symptoms": [
+      "Pending",
+      "Unschedulable",
+      "insufficient_cpu"
+    ],
+    "root_cause": "cluster_capacity_or_scheduling_constraint",
+    "safe_remediation": "adjust_requests_or_scale_nodes",
+    "severity": "P3",
+    "service": "portfolio-analytics-api",
+    "training_only": true
+  },
+  {
+    "id": "k8s-imagepull-001",
+    "title": "ImagePullBackOff due to bad image tag",
+    "symptoms": [
+      "ImagePullBackOff",
+      "ErrImagePull",
+      "manifest_unknown"
+    ],
+    "root_cause": "invalid_image_tag_or_registry_auth",
+    "safe_remediation": "fix_image_tag_or_imagepullsecret",
+    "severity": "P2",
+    "service": "fraud-detection-engine",
+    "training_only": true
+  },
+  {
+    "id": "k8s-istio-mtls-001",
+    "title": "Service connection failures after mTLS STRICT policy",
+    "symptoms": [
+      "503",
+      "mTLS",
+      "DestinationRule",
+      "sidecar"
+    ],
+    "root_cause": "istio_mtls_policy_mismatch",
+    "safe_remediation": "fix_peer_authentication_or_destinationrule",
+    "severity": "P1",
+    "service": "trade-execution-api",
+    "training_only": true
+  }
+]

@@ -1,0 +1,1 @@
+{"incident_id":"INC-2026-002","service":"checkout-api","symptoms":["high latency","increased 5xx"],"signals":{"recent_deployments":[{"service":"checkout-api","revision":"abc123","deployed_minutes_ago":7}]}}

@@ -1,0 +1,64 @@
+name: Reusable Application CI
+
+on:
+  workflow_call:
+    inputs:
+      service_id:
+        required: true
+        type: string
+      app_path:
+        required: true
+        type: string
+      language:
+        required: true
+        type: string
+      dockerfile:
+        required: false
+        type: string
+        default: Dockerfile
+
+jobs:
+  build-test:
+    name: Build and test ${{ inputs.service_id }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.app_path }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java
+        if: inputs.language == 'java'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Node.js
+        if: inputs.language == 'node'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Python
+        if: inputs.language == 'python'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run Java tests
+        if: inputs.language == 'java'
+        run: |
+          if [ -f ./gradlew ]; then ./gradlew test; elif [ -f pom.xml ]; then mvn test; else echo "No Java build file found"; fi
+
+      - name: Run Node tests
+        if: inputs.language == 'node'
+        run: |
+          if [ -f package-lock.json ]; then npm ci; elif [ -f package.json ]; then npm install; fi
+          if [ -f package.json ]; then npm test --if-present; else echo "No package.json found"; fi
+
+      - name: Run Python tests
+        if: inputs.language == 'python'
+        run: |
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -d tests ]; then python -m pytest -q; else echo "No Python tests found"; fi

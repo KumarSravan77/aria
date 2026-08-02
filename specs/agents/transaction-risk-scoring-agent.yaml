@@ -1,0 +1,13 @@
+agent:
+  name: transaction-risk-scoring-agent
+  type: specialist
+purpose:
+  summary: Verify every transaction flow has risk scoring, explanations, thresholds,
+    and audit trail.
+checks:
+- model_mapping
+- risk_score_response
+- explainability
+- audit_log
+- case_management_handoff
+- latency_slo

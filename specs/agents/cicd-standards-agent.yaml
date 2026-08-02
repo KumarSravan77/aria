@@ -1,0 +1,22 @@
+agent:
+  name: cicd-standards-agent
+  type: specialist
+  version: 1.0.0
+purpose:
+  summary: Validate pipeline quality, deployment safety, and DevSecOps standards.
+checks:
+  - build_reproducibility
+  - unit_tests
+  - integration_tests
+  - sast
+  - sca
+  - container_scan
+  - secret_scan
+  - sbom
+  - canary_or_blue_green
+  - rollback
+  - approvals
+outputs:
+  - cicd_maturity_score
+  - cicd_findings
+  - pipeline_fix_candidates

@@ -1,0 +1,48 @@
+{
+  "event_type": "slo_burn",
+  "service_id": "checkout-api",
+  "environment": "prod",
+  "severity": "P1",
+  "source": "prometheus-alertmanager",
+  "summary": "Fast burn alert: checkout-api consumed error budget rapidly after deployment",
+  "signals": {
+    "post_deploy_slo_burn": true,
+    "error_budget_remaining_percent": 3.5,
+    "burn_rate": 8.2
+  },
+  "context": {
+    "service_profile": {
+      "service_id": "checkout-api",
+      "language": "python",
+      "tier": "tier1",
+      "kubernetes": {
+        "readinessProbe": true,
+        "livenessProbe": true,
+        "pdb": false
+      },
+      "observability": {
+        "otel_enabled": true
+      },
+      "cicd": {
+        "build": true,
+        "unit_tests": true,
+        "security_scan": true,
+        "sbom": true,
+        "rollback": true,
+        "deployment_strategy": true
+      }
+    },
+    "slo_config": {
+      "availability_target": 99.9,
+      "latency_p95_target_ms": 500,
+      "error_rate_target": 0.01
+    },
+    "telemetry_snapshot": {
+      "availability": 99.4,
+      "latency_p95_ms": 820,
+      "error_rate": 0.025,
+      "error_budget_remaining_percent": 3.5,
+      "burn_rate": 8.2
+    }
+  }
+}

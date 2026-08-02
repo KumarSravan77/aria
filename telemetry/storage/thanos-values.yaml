@@ -1,0 +1,13 @@
+objstoreConfig: |-
+  type: S3
+  config:
+    bucket: thanos-metrics
+    endpoint: minio.telemetry.svc.cluster.local:9000
+    access_key: ${MINIO_ACCESS_KEY}
+    secret_key: ${MINIO_SECRET_KEY}
+    insecure: true
+query: {replicaCount: 2}
+queryFrontend: {replicaCount: 2}
+storegateway: {replicaCount: 2, persistence: {enabled: true, size: 10Gi}}
+compactor: {enabled: true, retentionResolutionRaw: 30d, retentionResolution5m: 90d, retentionResolution1h: 365d, persistence: {enabled: true, size: 20Gi}}
+metrics: {enabled: true, serviceMonitor: {enabled: true}}

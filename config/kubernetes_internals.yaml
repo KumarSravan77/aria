@@ -1,0 +1,21 @@
+kubernetes_internals:
+  etcd:
+    backup_required: true
+    max_backup_age_hours: 24
+    encryption_required: true
+    restore_validation_required: true
+    production_restore_mode: manual_only
+  control_plane:
+    api_server_p95_latency_ms: 500
+    scheduler_required: true
+    controller_manager_required: true
+  dns:
+    coredns_required_replicas: 2
+  admission:
+    required_webhooks: [kyverno, gatekeeper]
+  cni:
+    check_node_network_unavailable: true
+  upgrade:
+    check_deprecated_apis: true
+    check_pdb_coverage: true
+    check_node_version_skew: true

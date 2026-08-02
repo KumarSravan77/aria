@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata: {name: otel-gateway, namespace: telemetry}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: otel-gateway, namespace: telemetry}
+spec:
+  replicas: 3
+  selector: {matchLabels: {app: otel-gateway}}
+  template:
+    metadata: {labels: {app: otel-gateway}}
+    spec:
+      serviceAccountName: otel-gateway
+      topologySpreadConstraints:
+        - {maxSkew: 1, topologyKey: kubernetes.io/hostname, whenUnsatisfiable: ScheduleAnyway, labelSelector: {matchLabels: {app: otel-gateway}}}
+      containers:
+        - name: collector
+          image: otel/opentelemetry-collector-contrib:0.147.0
+          args: [--config=/etc/otel/collector.yaml]
+          ports:
+            - {name: otlp-grpc, containerPort: 4317}
+            - {name: otlp-http, containerPort: 4318}
+            - {name: metrics, containerPort: 8888}
+            - {name: prom-export, containerPort: 8889}
+            - {name: health, containerPort: 13133}
+          readinessProbe: {httpGet: {path: /, port: health}}
+          livenessProbe: {httpGet: {path: /, port: health}}
+          resources:
+            requests: {cpu: 500m, memory: 512Mi}
+            limits: {cpu: "2", memory: 2Gi}
+          securityContext: {allowPrivilegeEscalation: false, runAsNonRoot: true}
+          volumeMounts:
+            - {name: config, mountPath: /etc/otel}
+            - {name: queue, mountPath: /var/lib/otelcol/queue}
+      volumes:
+        - name: config
+          configMap: {name: otel-gateway-config}
+        - name: queue
+          emptyDir: {sizeLimit: 10Gi}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: otel-gateway, namespace: telemetry, labels: {app: otel-gateway}}
+spec:
+  selector: {app: otel-gateway}
+  ports:
+    - {name: otlp-grpc, port: 4317}
+    - {name: otlp-http, port: 4318}
+    - {name: metrics, port: 8888}
+    - {name: prom-export, port: 8889}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata: {name: otel-gateway, namespace: telemetry}
+spec: {minAvailable: 2, selector: {matchLabels: {app: otel-gateway}}}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata: {name: otel-gateway, namespace: telemetry}
+spec:
+  scaleTargetRef: {apiVersion: apps/v1, kind: Deployment, name: otel-gateway}
+  minReplicas: 3
+  maxReplicas: 20
+  metrics:
+    - type: Resource
+      resource: {name: cpu, target: {type: Utilization, averageUtilization: 65}}

@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: checkout-api
+  namespace: demo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: checkout-api
+  template:
+    metadata:
+      labels:
+        app: checkout-api
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9000"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+        - name: checkout-api
+          image: checkout-api:local
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 9000
+          env:
+            - name: CHAOS_LATENCY_MS
+              value: "0"
+            - name: CHAOS_ERROR_RATE
+              value: "0"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 9000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: checkout-api
+  namespace: demo
+  labels:
+    app: checkout-api
+spec:
+  selector:
+    app: checkout-api
+  ports:
+    - name: http
+      port: 9000
+      targetPort: 9000

@@ -1,0 +1,12 @@
+{
+  "title": "ARIA Telemetry Pipeline Health",
+  "uid": "aria-telemetry-health",
+  "schemaVersion": 39,
+  "time": {"from": "now-6h", "to": "now"},
+  "panels": [
+    {"type": "timeseries", "title": "Accepted vs refused logs", "targets": [{"expr": "sum(rate(otelcol_receiver_accepted_log_records[5m]))", "legendFormat": "accepted"}, {"expr": "sum(rate(otelcol_receiver_refused_log_records[5m]))", "legendFormat": "refused"}], "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8}},
+    {"type": "timeseries", "title": "Exporter queue utilization", "targets": [{"expr": "max by (exporter) (otelcol_exporter_queue_size / clamp_min(otelcol_exporter_queue_capacity, 1))"}], "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8}},
+    {"type": "timeseries", "title": "Kafka consumer lag", "targets": [{"expr": "max by (consumergroup, topic) (kafka_consumergroup_lag)"}], "gridPos": {"x": 0, "y": 8, "w": 12, "h": 8}},
+    {"type": "timeseries", "title": "Loki discarded bytes", "targets": [{"expr": "sum by (reason) (rate(loki_discarded_bytes_total[5m]))"}], "gridPos": {"x": 12, "y": 8, "w": 12, "h": 8}}
+  ]
+}

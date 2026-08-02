@@ -1,0 +1,22 @@
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Allow known test/example patterns and dev placeholders"
+regexes = [
+  # Example/placeholder values in .env.example
+  '''replace-with-generated''',
+  # Test tokens set by conftest.py — never real secrets
+  '''test-(requester|approver|commander|falco)-token''',
+  '''test-alertmanager-secret''',
+  '''test-sre''',
+  # Bearer token in dry-run script output (not a real credential)
+  '''Bearer \$\{TOKEN\}''',
+]
+
+[[rules]]
+description = "ARIA webhook secrets in .env — block real values only"
+id = "aria-webhook-secret"
+regex = '''(ALERTMANAGER_WEBHOOK_SECRET|FALCO_WEBHOOK_SECRET)\s*=\s*[A-Za-z0-9_\-]{20,}'''
+[rules.allowlist]
+  paths = ['''.env\.example''', '''conftest\.py''', '''tests/''']

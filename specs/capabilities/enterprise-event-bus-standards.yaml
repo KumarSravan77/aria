@@ -1,0 +1,26 @@
+capability:
+  name: enterprise-event-bus-standards
+  version: 1.0.0
+  summary: Ensures every transaction-producing application publishes governed events
+    to the enterprise AML/Fraud event bus.
+required_controls:
+- transaction_event_publication
+- schema_registry_validation
+- kafka_topic_declared
+- dlq_configured
+- pii_tokenization
+- lineage_metadata
+- consumer_lag_slo
+- idempotency_key
+- replay_support
+checks:
+- event_publication_required
+- schema_validation_required
+- dlq_required
+- pii_protection_required
+- consumer_lag_slo_required
+- lineage_required
+outputs:
+- eventing_grade
+- event_routing_findings
+- aml_integration_status

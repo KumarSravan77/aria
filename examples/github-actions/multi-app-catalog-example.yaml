@@ -1,0 +1,17 @@
+applications:
+  - service_id: payments-api
+    app_path: apps/payments-api
+    language: java
+    framework: spring-boot
+    dockerfile: apps/payments-api/Dockerfile
+    helm_chart: k8s/charts/payments-api
+    tier: tier1
+    owner_team: payments
+  - service_id: fraud-worker
+    app_path: apps/fraud-worker
+    language: python
+    framework: fastapi
+    dockerfile: apps/fraud-worker/Dockerfile
+    helm_chart: k8s/charts/fraud-worker
+    tier: tier1
+    owner_team: aml-fraud

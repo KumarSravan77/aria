@@ -1,0 +1,20 @@
+allowed_actions:
+  - restart_deployment
+  - scale_deployment
+  - rollback_deployment
+  - restart_pod
+
+restricted_actions:
+  - delete_namespace
+  - delete_database
+  - terraform_destroy
+  - rotate_secrets
+
+require_approval:
+  - rollback_deployment
+  - restart_deployment
+
+privileged_roles:
+  - sre
+  - platform-admin
+  - incident-commander

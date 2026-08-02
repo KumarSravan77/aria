@@ -1,0 +1,46 @@
+{
+  "service_id": "payments-api",
+  "environment": "prod",
+  "service_profile": {
+    "tier": "tier1",
+    "language": "java",
+    "framework": "spring-boot",
+    "kubernetes": {
+      "readinessProbe": false,
+      "livenessProbe": false,
+      "startupProbe": false,
+      "pdb": false,
+      "resources": {}
+    },
+    "observability": {
+      "otel_enabled": true,
+      "otel": {
+        "service_name": "payments-api",
+        "trace_context_propagation": false,
+        "high_cardinality_attributes": ["user_id", "session_id"]
+      }
+    },
+    "cicd": {
+      "sast": true,
+      "container_scan": false,
+      "rollback": false,
+      "approval_gate": true
+    }
+  },
+  "slo_config": {
+    "availability_target": 99.95,
+    "latency_p95_target_ms": 300,
+    "error_rate_target": 0.01
+  },
+  "telemetry_snapshot": {
+    "availability": 99.89,
+    "latency_p95_ms": 420,
+    "error_rate": 0.024,
+    "error_budget_remaining_percent": 4,
+    "burn_rate": 6.5
+  },
+  "latest_drift_summary": {
+    "status": "drift_detected",
+    "severity": "P1"
+  }
+}

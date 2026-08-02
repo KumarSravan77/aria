@@ -1,0 +1,16 @@
+workflow:
+  name: onboarding
+  version: 1.0.0
+steps:
+  - discover_application
+  - match_golden_path
+  - generate_cicd
+  - generate_kubernetes_artifacts
+  - generate_observability_artifacts
+  - run_initial_terraform_drift_baseline
+  - create_service_baseline
+  - generate_onboarding_report
+outputs:
+  - generated_artifacts
+  - baseline_scorecard
+  - production_readiness_gaps

@@ -1,0 +1,26 @@
+capability:
+  name: data-pipeline-standards
+  version: 1.0.0
+  owner: data-platform
+requirements:
+  required:
+  - feature_store_config
+  - data_quality_checks
+  - schema_validation
+  - lineage_tracking
+  - pipeline_sla
+  - idempotent_reprocessing
+  - backfill_support
+checks:
+  feature_store_required: true
+  schema_validation_required: true
+  data_lineage_required: true
+  idempotency_required: true
+  pipeline_sla_defined: true
+  data_quality_thresholds_required: true
+  backfill_strategy_required: true
+outputs:
+- data_pipeline_grade
+- data_quality_findings
+- lineage_gaps
+- pipeline_sla_findings

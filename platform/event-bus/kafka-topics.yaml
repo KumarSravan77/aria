@@ -1,0 +1,28 @@
+topics:
+- name: transactions.events
+  schema: transaction-event-v1
+  producers:
+  - payments-api
+  - orders-api
+  - fraud-detection-engine
+  - aml-feature-pipeline
+  consumers:
+  - aml-feature-pipeline
+  - fraud-detection-engine
+  dlq: transactions.events.dlq
+  retention: 7d
+  partitions: 12
+  slo:
+    consumer_lag_max_records: 1000
+    p95_publish_latency_ms: 250
+- name: transactions.risk-scored
+  schema: transaction-risk-score-v1
+  producers:
+  - fraud-detection-engine
+  consumers:
+  - case-management
+  - payments-api
+  - orders-api
+  dlq: transactions.risk-scored.dlq
+  retention: 30d
+  partitions: 12

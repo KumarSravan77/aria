@@ -1,0 +1,189 @@
+domains:
+  capital_markets:
+    display_name: Capital Markets
+    description: Trading, clearing, settlement and market data services
+    business_criticality: critical
+    services:
+    - name: trade-execution-api
+      owner_team: capital-markets-sre
+      runtime: kubernetes
+      language: java
+      framework: spring-boot
+      slo:
+        availability: 99.99
+        latency_p99_ms: 50
+      risk_profile: trading-hours-sensitive
+      common_incidents:
+      - high_latency
+      - db_timeout
+      - order_queue_backlog
+      transaction_event_publication:
+        enabled: true
+        topic: transactions.events
+        schema: transaction-event-v1
+        aml_consumer: aml-feature-pipeline
+        risk_scoring_service: fraud-detection-engine
+      devsecops_required: true
+    - name: market-data-feed
+      owner_team: capital-markets-sre
+      runtime: kubernetes
+      language: go
+      slo:
+        availability: 99.99
+        latency_p99_ms: 10
+      common_incidents:
+      - feed_gap
+      - latency_spike
+  retail_banking:
+    display_name: Retail Banking
+    description: Customer accounts, payments and digital banking
+    business_criticality: critical
+    services:
+    - name: payment-processing-api
+      owner_team: payments-platform
+      runtime: kubernetes
+      language: java
+      framework: spring-boot
+      slo:
+        availability: 99.95
+        latency_p99_ms: 500
+      risk_profile: pci-dss
+      common_incidents:
+      - database_timeout
+      - payment_latency
+      - connection_pool_exhaustion
+      transaction_event_publication:
+        enabled: true
+        topic: transactions.events
+        schema: transaction-event-v1
+        aml_consumer: aml-feature-pipeline
+        risk_scoring_service: fraud-detection-engine
+      devsecops_required: true
+    - name: account-management-api
+      owner_team: retail-banking-sre
+      runtime: kubernetes
+      language: python
+      slo:
+        availability: 99.9
+        latency_p99_ms: 1000
+      common_incidents:
+      - pod_crashloop
+      - oom_killed
+      transaction_event_publication:
+        enabled: true
+        topic: transactions.events
+        schema: transaction-event-v1
+        aml_consumer: aml-feature-pipeline
+        risk_scoring_service: fraud-detection-engine
+      devsecops_required: true
+  wealth_management:
+    display_name: Wealth Management
+    description: Investment advisory and portfolio management
+    business_criticality: high
+    services:
+    - name: investment-recommendation-engine
+      owner_team: wealth-ai-team
+      runtime: kubernetes
+      language: python
+      framework: fastapi
+      slo:
+        availability: 99.9
+        latency_p99_ms: 3000
+      risk_profile: ai-ml-workload
+      common_incidents:
+      - model_latency
+      - gpu_oom
+      - inference_timeout
+  aml_fraud:
+    display_name: AML and Fraud Detection
+    description: Anti-money laundering and real-time fraud prevention
+    business_criticality: critical
+    services:
+    - name: fraud-detection-engine
+      owner_team: fraud-platform-sre
+      runtime: kubernetes
+      language: java
+      slo:
+        availability: 99.99
+        latency_p99_ms: 100
+      risk_profile: fintrac-regulated
+      common_incidents:
+      - kafka_lag
+      - streaming_delay
+      - pod_eviction
+      transaction_event_publication:
+        enabled: true
+        topic: transactions.events
+        schema: transaction-event-v1
+        aml_consumer: aml-feature-pipeline
+        risk_scoring_service: fraud-detection-engine
+      devsecops_required: true
+      mlops_integration:
+        feature_store: feast
+        model_registry: mlflow
+        serving: kserve
+        drift_monitoring: true
+        fintrac_audit: true
+    - name: aml-feature-pipeline
+      owner_team: fraud-platform-sre
+      runtime: kubernetes
+      language: python
+      framework: apache-beam
+      risk_profile: mlops-fintrac
+      slo:
+        pipeline_success_rate: 99.9
+        freshness_minutes: 15
+      common_incidents:
+      - model_drift
+      - feature_store_lag
+      - training_pipeline_failure
+      - data_schema_drift
+      mlops_integration:
+        feature_store: feast
+        model_registry: mlflow
+        serving: kserve
+        drift_monitoring: true
+        fintrac_audit: true
+  insurance:
+    display_name: Insurance
+    description: Policy management and claims processing
+    business_criticality: high
+    services:
+    - name: document-processing-ai
+      owner_team: insurance-platform
+      runtime: kubernetes
+      language: python
+      framework: fastapi
+      slo:
+        availability: 99.5
+        latency_p99_ms: 10000
+      risk_profile: ai-pipeline
+      common_incidents:
+      - job_failure
+      - pod_crashloop
+      - oom_killed
+  retail_ecommerce:
+    display_name: Retail E-Commerce
+    description: Online retail checkout, inventory and recommendations
+    business_criticality: high
+    services:
+    - name: checkout-api
+      owner_team: platform
+      runtime: kubernetes
+      language: python
+      framework: fastapi
+      slo:
+        availability: 99.9
+        latency_p99_ms: 2000
+      risk_profile: revenue-impacting
+      common_incidents:
+      - high_latency
+      - increased_5xx
+      - deployment_regression
+      transaction_event_publication:
+        enabled: true
+        topic: transactions.events
+        schema: transaction-event-v1
+        aml_consumer: aml-feature-pipeline
+        risk_scoring_service: fraud-detection-engine
+      devsecops_required: true

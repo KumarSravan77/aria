@@ -1,0 +1,26 @@
+model
+  schema 1.1
+
+type user
+
+type team
+  relations
+    define member: [user]
+
+type service
+  relations
+    define owner: [team]
+    define supporter: [team]
+    define can_view: owner->member or supporter->member
+    define can_approve: owner->member or supporter->member
+
+type incident
+  relations
+    define parent_service: [service]
+    define viewer: parent_service->can_view
+    define approver: parent_service->can_approve
+
+type runbook
+  relations
+    define parent_service: [service]
+    define viewer: parent_service->can_view

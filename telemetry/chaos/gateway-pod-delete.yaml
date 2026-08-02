@@ -1,0 +1,9 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata: {name: otel-gateway-pod-delete, namespace: telemetry}
+spec:
+  action: pod-kill
+  mode: one
+  selector: {namespaces: [telemetry], labelSelectors: {app: otel-gateway}}
+  duration: 30s
+  scheduler: {cron: "@every 1h"}

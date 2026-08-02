@@ -1,0 +1,7 @@
+{
+  "rule": "Terminal shell in container",
+  "priority": "Critical",
+  "output": "A shell was spawned in a container",
+  "k8s": {"pod_name": "checkout-api"},
+  "incident_id": "FALCO-001"
+}

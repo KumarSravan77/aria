@@ -1,0 +1,15 @@
+agent:
+  name: devsecops-agent
+  type: specialist
+purpose:
+  summary: Evaluate DevSecOps controls for each application/service.
+checks:
+- sast
+- sca
+- container_scan
+- secret_scan
+- iac_scan
+- sbom
+- image_signing
+- policy_as_code
+- runtime_detection

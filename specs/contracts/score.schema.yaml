@@ -1,0 +1,11 @@
+schema:
+  name: score
+  version: 1.0.0
+properties:
+  name: string
+  grade:
+    enum: [A, B, C, D, F]
+  numeric_score: number
+  rationale: string
+  blockers:
+    type: list

@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+
+# Local env/secrets
+.env
+.env.*
+!.env.example
+
+# Local DB/files
+*.db
+*.sqlite
+*.sqlite3
+chroma/
+data/
+tmp/
+
+# OS/editor
+.DS_Store
+.idea/
+.vscode/
+
+# Node/frontend
+node_modules/
+dist/
+build/
+.next/
+
+# Docker/K8s generated
+*.log
+kind-kubeconfig
+incident_investigator.db

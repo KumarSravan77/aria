@@ -1,0 +1,13 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata: {name: aria-telemetry, namespace: argocd}
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/REPLACE_ORG/aria.git
+    targetRevision: main
+    path: telemetry/overlays/local
+  destination: {server: https://kubernetes.default.svc, namespace: telemetry}
+  syncPolicy:
+    automated: {prune: true, selfHeal: true}
+    syncOptions: [CreateNamespace=true, ServerSideApply=true]

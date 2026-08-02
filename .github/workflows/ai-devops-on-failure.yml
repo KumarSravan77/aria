@@ -1,0 +1,46 @@
+name: AI DevOps Failure Analysis
+
+on:
+  workflow_run:
+    workflows:
+      - Multi-Application ARIA Platform CI
+      - ARIA Platform CI
+    types: [completed]
+
+jobs:
+  analyze-failure:
+    if: github.event.workflow_run.conclusion == 'failure'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Create AI DevOps failure event
+        run: |
+          mkdir -p artifacts
+          cat > artifacts/github-actions-failure-event.json <<EOF
+          {
+            "event_type": "pipeline_failure",
+            "source": "github_actions",
+            "workflow": "${{ github.event.workflow_run.name }}",
+            "conclusion": "${{ github.event.workflow_run.conclusion }}",
+            "run_id": "${{ github.event.workflow_run.id }}",
+            "run_url": "${{ github.event.workflow_run.html_url }}",
+            "repository": "${{ github.repository }}",
+            "branch": "${{ github.event.workflow_run.head_branch }}",
+            "commit": "${{ github.event.workflow_run.head_sha }}"
+          }
+          EOF
+      - name: Run ARIA AI DevOps analysis hook
+        run: |
+          python scripts/aria_failure_analysis.py artifacts/github-actions-failure-event.json > artifacts/aria-failure-analysis.md
+      - name: Upload AI failure analysis
+        uses: actions/upload-artifact@v4
+        with:
+          name: aria-failure-analysis
+          path: artifacts/aria-failure-analysis.md

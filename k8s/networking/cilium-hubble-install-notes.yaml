@@ -1,0 +1,8 @@
+# For a real cluster, install Cilium and enable Hubble:
+# cilium install
+# cilium hubble enable --ui
+# cilium hubble port-forward
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cilium-system

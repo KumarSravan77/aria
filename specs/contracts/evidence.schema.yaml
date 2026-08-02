@@ -1,0 +1,10 @@
+schema:
+  name: evidence
+  version: 1.0.0
+properties:
+  source: string
+  path: string
+  observed: string
+  expected: string
+  timestamp: string
+  collector: string

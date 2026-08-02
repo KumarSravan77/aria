@@ -1,0 +1,1 @@
+{"service":"checkout-api","total_requests":10000,"failed_requests":42,"slo_target":99.9}

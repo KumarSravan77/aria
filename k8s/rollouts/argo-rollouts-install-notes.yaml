@@ -1,0 +1,7 @@
+# Install command:
+# kubectl create namespace argo-rollouts
+# kubectl apply -n argo-rollouts -f https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: argo-rollouts

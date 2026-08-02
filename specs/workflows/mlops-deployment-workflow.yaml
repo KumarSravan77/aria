@@ -1,0 +1,24 @@
+workflow:
+  name: mlops-deployment-workflow
+  version: 1.0.0
+  owner: ml-platform
+steps:
+- validate_data_quality
+- run_feature_pipeline
+- trigger_model_training
+- evaluate_model_metrics
+- check_explainability
+- run_compliance_audit
+- gate_production_approval
+- deploy_inference_service
+- enable_drift_monitoring
+outputs:
+- model_card
+- compliance_report
+- deployment_approval
+- drift_baseline
+gates:
+  require_model_registry_version: true
+  require_explainability_report: true
+  require_fintrac_audit_log: true
+  block_on_model_drift: true

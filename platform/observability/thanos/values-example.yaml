@@ -1,0 +1,12 @@
+query:
+  enabled: true
+storegateway:
+  enabled: true
+compactor:
+  enabled: true
+objstoreConfig: |-
+  type: S3
+  config:
+    bucket: aria-thanos-metrics
+    endpoint: s3.amazonaws.com
+    region: us-east-1

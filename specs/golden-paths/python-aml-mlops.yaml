@@ -1,0 +1,47 @@
+golden_path:
+  name: python-aml-mlops
+  version: 1.0.0
+  applies_to:
+    runtime: python
+    workload_type: mlops
+  required_capabilities: &id001
+  - kubernetes-standards
+  - observability-standards
+  - cicd-standards
+  - reliability-standards
+  - data-pipeline-standards
+  - model-governance
+  - service-mesh-standards
+  - gitops-standards
+  - enterprise-event-bus-standards
+  - transaction-risk-scoring-standards
+  - devsecops-standards
+required_capabilities: *id001
+required_artifacts:
+- Dockerfile
+- helm_chart
+- feature_store_config
+- model_registry_config
+- training_pipeline
+- inference_service
+- data_quality_checks
+- model_drift_config
+- fintrac_audit_log
+- retraining_trigger
+- slo_config
+- runbook
+minimum_scores:
+  kubernetes: B
+  observability: B
+  cicd: B
+  reliability: B
+  data_pipeline: B
+  model_governance: A
+production_gates:
+  require_approval: true
+  block_on_p0: true
+  block_on_missing_slo: true
+  require_model_explainability: true
+  require_pii_validation: true
+  require_compliance_audit_trail: true
+  block_on_model_drift: true

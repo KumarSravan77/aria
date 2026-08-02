@@ -1,0 +1,23 @@
+# ARIA multi-application service catalog used by GitHub Actions and service review.
+# Each onboarded application can reuse the same CI/CD standards with its own profile.
+applications:
+  - service_id: payments-api
+    app_path: apps/payments-api
+    language: java
+    framework: spring-boot
+    dockerfile: apps/payments-api/Dockerfile
+    helm_chart: k8s/charts/payments-api
+    service_profile: examples/self_service/service_review_request.json
+    tier: tier1
+    owner_team: platform
+    slo_profile: gold
+  - service_id: inventory-api
+    app_path: apps/inventory-api
+    language: node
+    framework: express
+    dockerfile: apps/inventory-api/Dockerfile
+    helm_chart: k8s/charts/inventory-api
+    service_profile: examples/self_service/service_review_request.json
+    tier: tier2
+    owner_team: platform
+    slo_profile: silver

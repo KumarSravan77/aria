@@ -1,0 +1,31 @@
+{
+  "service_id": "payments-api",
+  "environment": "prod",
+  "service_profile": {
+    "language": "java",
+    "framework": "spring-boot",
+    "tier": "tier1",
+    "compliance": ["pci"],
+    "standards": {
+      "probes_configured": true,
+      "resources_configured": true,
+      "hpa_configured": true,
+      "pdb_configured": false,
+      "rollback_configured": true
+    }
+  },
+  "slo_config": {
+    "availability": 99.95,
+    "latency_p95_ms": 300,
+    "error_rate_percent": 0.1,
+    "error_budget_remaining_min_percent": 10,
+    "burn_rate_max": 2.0
+  },
+  "telemetry_snapshot": {
+    "availability": 99.89,
+    "latency_p95_ms": 420,
+    "error_rate_percent": 0.4,
+    "error_budget_remaining_percent": 4,
+    "burn_rate": 6.5
+  }
+}

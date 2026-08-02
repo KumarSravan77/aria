@@ -1,0 +1,23 @@
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosEngine
+metadata:
+  name: checkout-network-latency
+  namespace: demo
+spec:
+  appinfo:
+    appns: demo
+    applabel: app=checkout-api
+    appkind: deployment
+  chaosServiceAccount: litmus-admin
+  engineState: active
+  experiments:
+    - name: pod-network-latency
+      spec:
+        components:
+          env:
+            - name: TOTAL_CHAOS_DURATION
+              value: "60"
+            - name: NETWORK_LATENCY
+              value: "1200"
+            - name: CONTAINER_RUNTIME
+              value: "containerd"

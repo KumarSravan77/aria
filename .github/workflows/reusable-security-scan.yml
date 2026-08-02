@@ -1,0 +1,35 @@
+name: Reusable Security Scan
+
+on:
+  workflow_call:
+    inputs:
+      service_id:
+        required: true
+        type: string
+      app_path:
+        required: true
+        type: string
+
+jobs:
+  security:
+    name: Security scan ${{ inputs.service_id }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Secret scan with Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        continue-on-error: true
+      - name: Filesystem vulnerability scan with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: ${{ inputs.app_path }}
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+        continue-on-error: true
+      - name: Generate SBOM with Syft
+        uses: anchore/sbom-action@v0
+        with:
+          path: ${{ inputs.app_path }}
+          artifact-name: ${{ inputs.service_id }}-sbom.spdx.json
+        continue-on-error: true

@@ -1,0 +1,3 @@
+resources:
+  - ../../../gitops/rollouts/checkout-api-rollout.yaml
+  - ../../../gitops/rollouts/analysis-template.yaml

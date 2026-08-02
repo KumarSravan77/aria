@@ -1,0 +1,48 @@
+capability:
+  name: devsecops-standards
+  version: 1.0.0
+  summary: Mandatory DevSecOps controls for every onboarded application and ML/data
+    service.
+required_tools:
+  sast:
+  - semgrep
+  - sonarqube
+  sca:
+  - dependabot
+  - snyk
+  container_scanning:
+  - trivy
+  - grype
+  secrets_scanning:
+  - gitleaks
+  - trufflehog
+  iac_scanning:
+  - checkov
+  - tfsec
+  policy_as_code:
+  - opa
+  - conftest
+  - kyverno
+  - gatekeeper
+  sbom:
+  - syft
+  signing:
+  - cosign
+  runtime_security:
+  - falco
+required_controls:
+- sast
+- sca
+- container_scan
+- secret_scan
+- iac_scan
+- sbom
+- image_signing
+- policy_as_code
+- admission_policy
+- runtime_detection
+- security_gate_before_deploy
+outputs:
+- devsecops_grade
+- security_tool_findings
+- release_gate_status

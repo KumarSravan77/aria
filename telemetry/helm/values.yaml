@@ -1,0 +1,6 @@
+loki: {enabled: true}
+tempo: {enabled: true}
+thanos: {enabled: false}
+profile: local
+objectStorage:
+  existingSecret: telemetry-object-storage

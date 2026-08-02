@@ -1,0 +1,28 @@
+agent:
+  name: ai-service-review-agent
+  type: orchestrator
+  version: 1.0.0
+purpose:
+  summary: Generate AI-powered operational readiness review for an onboarded service.
+inputs:
+  required: [service_id, environment, service_profile]
+  optional: [latest_drift_summary, incident_history, slo_config, telemetry_snapshot]
+runs_agents:
+  - reliability-agent
+  - kubernetes-standards-agent
+  - observability-standards-agent
+  - otel-guardian-agent
+  - cicd-standards-agent
+  - security-governance-agent
+  - cost-optimization-agent
+  - runbook-quality-agent
+does_not_run:
+  - terraform-drift-agent
+consumes_if_available:
+  - latest_terraform_drift_result
+outputs:
+  - service_review_report
+  - maturity_scorecard
+  - p0_p1_p2_findings
+  - remediation_backlog
+  - approval_required_actions

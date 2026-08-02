@@ -1,0 +1,22 @@
+remediation_spec:
+  name: kubernetes-remediations
+  version: 1.0.0
+remediations:
+  crashloopbackoff:
+    allowed_actions:
+      - inspect_logs
+      - compare_recent_deployment
+      - rollback
+      - increase_memory_request
+      - create_pr_patch
+    blocked_actions:
+      - force_delete_stateful_pod_without_approval
+  imagepullbackoff:
+    allowed_actions:
+      - validate_image_tag
+      - validate_registry_secret
+      - create_pr_patch
+  missing_probes:
+    allowed_actions:
+      - generate_probe_patch
+      - create_pr_patch

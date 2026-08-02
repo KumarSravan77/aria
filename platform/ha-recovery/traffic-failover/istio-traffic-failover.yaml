@@ -1,0 +1,16 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: checkout-api-failover
+  namespace: demo
+spec:
+  hosts:
+    - checkout-api.example.com
+  http:
+    - route:
+        - destination:
+            host: checkout-api-primary.demo.svc.cluster.local
+          weight: 100
+        - destination:
+            host: checkout-api-standby.demo.svc.cluster.local
+          weight: 0

@@ -1,0 +1,34 @@
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: checkout-api
+  namespace: demo
+spec:
+  host: checkout-api.demo.svc.cluster.local
+  subsets:
+    - name: stable
+      labels:
+        app: checkout-api
+    - name: canary
+      labels:
+        app: checkout-api
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: checkout-api
+  namespace: demo
+spec:
+  hosts:
+    - checkout-api.demo.svc.cluster.local
+  http:
+    - name: primary
+      route:
+        - destination:
+            host: checkout-api.demo.svc.cluster.local
+            subset: stable
+          weight: 100
+        - destination:
+            host: checkout-api.demo.svc.cluster.local
+            subset: canary
+          weight: 0

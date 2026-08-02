@@ -1,0 +1,92 @@
+apiVersion: v1
+kind: ConfigMap
+metadata: {name: vector-config, namespace: telemetry}
+data:
+  vector.yaml: |
+    data_dir: /var/lib/vector
+    sources:
+      kafka_logs:
+        type: kafka
+        bootstrap_servers: redpanda.telemetry.svc.cluster.local:9092
+        group_id: aria-loki-writers
+        topics: [otlp-logs]
+        decoding: {codec: json}
+    transforms:
+      normalize:
+        type: remap
+        inputs: [kafka_logs]
+        source: |
+          .aria_received_at = now()
+          .tenant = get(.resource.attributes, ["tenant.id"]) ?? "default"
+          .namespace = get(.resource.attributes, ["k8s.namespace.name"]) ?? "unknown"
+      route_priority:
+        type: route
+        inputs: [normalize]
+        route:
+          archive: '.severity_text == "DEBUG"'
+          hot: '.severity_text != "DEBUG"'
+    sinks:
+      loki:
+        type: loki
+        inputs: [route_priority.hot]
+        endpoint: http://loki-gateway.telemetry.svc.cluster.local
+        encoding: {codec: json}
+        labels: {tenant: "{{ tenant }}", namespace: "{{ namespace }}", service: "{{ service_name }}"}
+        batch: {max_bytes: 1048576, timeout_secs: 1}
+        request: {retry_attempts: 0, timeout_secs: 30}
+      archive:
+        type: aws_s3
+        inputs: [route_priority.archive]
+        bucket: telemetry-archive
+        endpoint: http://minio.telemetry.svc.cluster.local:9000
+        region: us-east-1
+        auth: {access_key_id: "${MINIO_ACCESS_KEY}", secret_access_key: "${MINIO_SECRET_KEY}"}
+        compression: gzip
+        encoding: {codec: ndjson}
+        key_prefix: "date=%F/hour=%H/"
+        force_path_style: true
+    api: {enabled: true, address: 0.0.0.0:8686}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: vector-consumer, namespace: telemetry}
+spec:
+  replicas: 3
+  selector: {matchLabels: {app: vector-consumer}}
+  template:
+    metadata: {labels: {app: vector-consumer}}
+    spec:
+      containers:
+        - name: vector
+          image: timberio/vector:0.43.1-debian
+          args: [--config, /etc/vector/vector.yaml]
+          envFrom: [{secretRef: {name: telemetry-object-storage}}]
+          resources:
+            requests: {cpu: 250m, memory: 256Mi}
+            limits: {cpu: "2", memory: 1Gi}
+          ports: [{name: api, containerPort: 8686}]
+          volumeMounts:
+            - {name: config, mountPath: /etc/vector}
+            - {name: data, mountPath: /var/lib/vector}
+      volumes:
+        - name: config
+          configMap: {name: vector-config}
+        - name: data
+          emptyDir: {sizeLimit: 5Gi}
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata: {name: vector-kafka-lag, namespace: telemetry}
+spec:
+  scaleTargetRef: {name: vector-consumer}
+  minReplicaCount: 3
+  maxReplicaCount: 30
+  cooldownPeriod: 300
+  triggers:
+    - type: kafka
+      metadata:
+        bootstrapServers: redpanda.telemetry.svc.cluster.local:9092
+        consumerGroup: aria-loki-writers
+        topic: otlp-logs
+        lagThreshold: "50000"
+        offsetResetPolicy: latest

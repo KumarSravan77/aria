@@ -1,0 +1,26 @@
+golden_path:
+  name: python-ai-service
+  version: 1.0.0
+  applies_to:
+    runtime: python
+    workload_type: ai-service
+  required_capabilities: &id001
+  - kubernetes-standards
+  - observability-standards
+  - cicd-standards
+  - reliability-standards
+  - service-mesh-standards
+  - gitops-standards
+  - devsecops-standards
+required_capabilities: *id001
+required_artifacts:
+- Dockerfile
+- helm_chart
+- model_observability
+- token_tracking
+- inference_latency_slo
+- cost_dashboard
+production_gates:
+  require_approval: true
+  require_model_cost_limit: true
+  require_pii_guardrails: true

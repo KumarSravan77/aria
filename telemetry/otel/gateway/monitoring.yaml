@@ -1,0 +1,31 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata: {name: otel-gateway, namespace: telemetry, labels: {release: kube-prometheus-stack}}
+spec:
+  selector: {matchLabels: {app: otel-gateway}}
+  endpoints:
+    - {port: metrics, interval: 15s}
+    - {port: prom-export, interval: 15s}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata: {name: telemetry-pipeline, namespace: telemetry, labels: {release: kube-prometheus-stack}}
+spec:
+  groups:
+    - name: telemetry-pipeline
+      rules:
+        - alert: OTelCollectorRefusingLogs
+          expr: sum(rate(otelcol_receiver_refused_log_records[5m])) > 0
+          for: 5m
+          labels: {severity: warning}
+          annotations: {summary: OpenTelemetry collectors are refusing logs}
+        - alert: OTelExporterQueueNearCapacity
+          expr: max(otelcol_exporter_queue_size / clamp_min(otelcol_exporter_queue_capacity, 1)) > 0.8
+          for: 10m
+          labels: {severity: critical}
+          annotations: {summary: OpenTelemetry exporter queue exceeds 80 percent}
+        - alert: TelemetryKafkaLagHigh
+          expr: max(kafka_consumergroup_lag{group=~"aria-.*"}) > 100000
+          for: 10m
+          labels: {severity: warning}
+          annotations: {summary: Telemetry consumers are falling behind}

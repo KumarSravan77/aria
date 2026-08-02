@@ -1,0 +1,6 @@
+apiVersion: v2
+name: aria
+version: 0.1.0
+type: application
+description: AI-native incident command platform
+appVersion: "1.0"

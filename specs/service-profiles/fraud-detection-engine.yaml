@@ -1,0 +1,80 @@
+service:
+  id: fraud-detection-engine
+  name: fraud-detection-engine
+  owner_team: fraud-platform-sre
+  tier: tier1
+  language: java
+  framework: spring-boot
+  runtime: kubernetes
+  golden_path: java-springboot-tier1
+  deployment_target: kubernetes
+  environment: prod
+  compliance:
+  - fintrac
+  - pii
+  slo:
+    availability: 99.99
+    latency_p99_ms: 100
+  streaming:
+    kafka_consumer: true
+    topics:
+    - transactions
+    - fraud-scores
+  risk_profile: fintrac-regulated
+  mesh: istio
+  gitops: argocd
+  delivery:
+    ci: github-actions
+    cd: argocd
+    deployment_strategy: canary
+    registry: ghcr
+  observability:
+    otel: true
+    prometheus: true
+    grafana: true
+    dynatrace: true
+    mesh_telemetry: true
+  eventing:
+    publishes_transaction_events: false
+    topic: transactions.events
+    schema: transaction-event-v1
+    dlq: transactions.events.dlq
+    pii_tokenization: true
+    lineage_enabled: true
+    consumer_lag_slo: true
+    idempotency_key: true
+    replay_support: true
+  risk_scoring:
+    enabled: true
+    model_mapping: aml-enterprise-default-risk-model
+    risk_score_response: true
+    explainability: true
+    audit_log: true
+    case_management_handoff: true
+    latency_slo_ms: 150
+  devsecops:
+    sast: true
+    sca: true
+    container_scan: true
+    secret_scan: true
+    iac_scan: true
+    sbom: true
+    image_signing: true
+    policy_as_code: true
+    admission_policy: true
+    runtime_detection: true
+    security_gate_before_deploy: true
+    tools:
+    - semgrep
+    - sonarqube
+    - dependabot
+    - snyk
+    - trivy
+    - gitleaks
+    - checkov
+    - tfsec
+    - syft
+    - cosign
+    - kyverno
+    - gatekeeper
+    - falco

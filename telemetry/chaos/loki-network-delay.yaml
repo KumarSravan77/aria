@@ -1,0 +1,9 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata: {name: loki-network-delay, namespace: telemetry}
+spec:
+  action: delay
+  mode: all
+  selector: {namespaces: [telemetry], labelSelectors: {app.kubernetes.io/name: loki}}
+  delay: {latency: 500ms, correlation: "50", jitter: 100ms}
+  duration: 10m

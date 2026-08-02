@@ -1,0 +1,20 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-ownership-labels
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: require-owner-and-service
+      match:
+        any:
+          - resources:
+              kinds: ["Pod"]
+      validate:
+        message: "Pods must include owner and service labels for ReBAC, incident routing, and cost allocation."
+        pattern:
+          metadata:
+            labels:
+              owner: "?*"
+              service: "?*"

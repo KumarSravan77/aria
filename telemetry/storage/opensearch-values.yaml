@@ -1,0 +1,12 @@
+replicas: 3
+minimumMasterNodes: 2
+opensearchJavaOpts: -Xms1g -Xmx1g
+resources:
+  requests: {cpu: 500m, memory: 2Gi}
+  limits: {cpu: "2", memory: 2Gi}
+persistence: {enabled: true, size: 30Gi}
+config:
+  opensearch.yml: |
+    plugins.security.disabled: false
+    action.auto_create_index: false
+    cluster.max_shards_per_node: 1000

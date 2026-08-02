@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: checkout-api-alerts
+  namespace: monitoring
+spec:
+  groups:
+    - name: checkout-api.rules
+      rules:
+        - alert: CheckoutHighLatency
+          expr: histogram_quantile(0.95, sum(rate(checkout_request_duration_seconds_bucket[5m])) by (le)) > 1
+          for: 2m
+          labels:
+            severity: warning
+            service: checkout-api
+          annotations:
+            summary: Checkout API p95 latency is high
+            runbook: docs/runbooks/high-api-latency.md

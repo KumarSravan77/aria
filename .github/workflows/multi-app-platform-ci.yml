@@ -1,0 +1,67 @@
+name: Multi-Application ARIA Platform CI
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  discover-apps:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - id: matrix
+        name: Build application matrix
+        run: |
+          python scripts/github_actions_matrix.py config/applications.yaml >> "$GITHUB_OUTPUT"
+
+  app-ci:
+    needs: discover-apps
+    if: needs.discover-apps.outputs.matrix != ''
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.discover-apps.outputs.matrix) }}
+    uses: ./.github/workflows/reusable-app-ci.yml
+    with:
+      service_id: ${{ matrix.service_id }}
+      app_path: ${{ matrix.app_path }}
+      language: ${{ matrix.language }}
+      dockerfile: ${{ matrix.dockerfile }}
+
+  security:
+    needs: discover-apps
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.discover-apps.outputs.matrix) }}
+    uses: ./.github/workflows/reusable-security-scan.yml
+    with:
+      service_id: ${{ matrix.service_id }}
+      app_path: ${{ matrix.app_path }}
+
+  docker-build:
+    needs: [discover-apps, app-ci]
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.discover-apps.outputs.matrix) }}
+    uses: ./.github/workflows/reusable-docker-build.yml
+    with:
+      service_id: ${{ matrix.service_id }}
+      app_path: ${{ matrix.app_path }}
+      dockerfile: ${{ matrix.dockerfile }}
+      push_image: false
+
+  aria-service-review:
+    needs: [discover-apps, app-ci, security]
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.discover-apps.outputs.matrix) }}
+    uses: ./.github/workflows/reusable-aria-service-review.yml
+    with:
+      service_id: ${{ matrix.service_id }}
+      service_profile: ${{ matrix.service_profile }}

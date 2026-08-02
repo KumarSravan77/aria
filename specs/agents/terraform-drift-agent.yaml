@@ -1,0 +1,23 @@
+agent:
+  name: terraform-drift-agent
+  type: independent
+  version: 1.0.0
+purpose:
+  summary: Detect cloud/IaC drift and generate risk-ranked remediation suggestions.
+trigger_modes: [on_demand, scheduled, onboarding_baseline, pre_release, audit]
+not_default_in: [service_review_agent]
+checks:
+  - terraform_plan_drift
+  - state_vs_cloud_resource_diff
+  - manual_console_change_detection
+  - iam_policy_drift
+  - security_group_drift
+  - tag_drift
+  - cost_impact
+  - compliance_impact
+  - blast_radius
+outputs:
+  - drift_summary
+  - drift_findings
+  - remediation_plan
+  - pr_patch_candidates

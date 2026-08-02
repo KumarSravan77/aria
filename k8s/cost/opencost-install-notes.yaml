@@ -1,0 +1,8 @@
+# Install command:
+# helm repo add opencost https://opencost.github.io/opencost-helm-chart
+# helm repo update
+# helm upgrade --install opencost opencost/opencost -n opencost --create-namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: opencost
