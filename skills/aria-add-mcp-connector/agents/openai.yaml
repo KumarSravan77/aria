@@ -1,0 +1,4 @@
+interface:
+  display_name: "ARIA MCP Connector"
+  short_description: "Add governed MCP evidence connectors"
+  default_prompt: "Use -add-mcp-connector to add a safe ARIA MCP integration."

@@ -24,3 +24,9 @@ Control: PullRequestGenerator.create_pr() requires GITOPS_PR_LIVE_ENABLED=true; 
 
 ### Agent direct execution
 Control: BaseAgent.run() returns AgentResult only; no agent has write access to Kubernetes, ArgoCD, or Git.
+
+### Memory poisoning
+Control: model-produced outcomes are stored as candidates; only incident-commanders/admins can promote entries with root-cause and evidence references. Only verified, non-superseded, ReBAC-scoped entries influence agents. Promotion is audited.
+
+### Sensitive checkpoint persistence
+Control: persistent graph checkpoints contain bounded counts, routing and status metadata, not raw telemetry, prompts, logs, secrets, customer records or financial payloads.

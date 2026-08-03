@@ -18,6 +18,10 @@ ARIA is an enterprise-grade AI-native SRE incident intelligence and governed rem
 
 Never allow the LLM to directly execute commands. All actions must be structured, policy-validated, audited, and approved when required.
 
+## Portable Skills and Runbooks
+
+Read the matching `skills/aria-investigate-incident/SKILL.md`, `skills/aria-author-runbook/SKILL.md`, or `skills/aria-add-mcp-connector/SKILL.md`. Treat `docs/runbooks/` as the canonical RAG corpus and never promote unverified AI conclusions into trusted memory.
+
 ## Key folders
 
 - `server/api`: FastAPI routes

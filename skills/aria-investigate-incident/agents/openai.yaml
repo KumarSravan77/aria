@@ -1,0 +1,4 @@
+interface:
+  display_name: "ARIA Incident Investigator"
+  short_description: "Investigate incidents with grounded evidence"
+  default_prompt: "Use -investigate-incident to investigate this operational incident safely."

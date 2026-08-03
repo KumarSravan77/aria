@@ -1,0 +1,4 @@
+interface:
+  display_name: "ARIA Runbook Author"
+  short_description: "Create RAG-ready operational runbooks"
+  default_prompt: "Use -author-runbook to create or improve an ARIA operational runbook."

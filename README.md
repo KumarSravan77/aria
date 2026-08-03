@@ -32,6 +32,41 @@ The featured end-to-end demo uses a fictional Canadian bank—MapleTrust Bank—
 
 It is designed for SRE, DevOps, Platform Engineering, AIOps, DevSecOps, and LLMOps interviews.
 
+## AI architecture and operating model
+
+ARIA correlates developer reports, CI/CD, changes, Kubernetes/EKS state, telemetry, security signals, Markdown runbooks and verified incident memory. AI produces evidence and recommendations; deterministic systems own mutations.
+
+```mermaid
+flowchart TB
+    D["Developer / Alert / ChatOps"] --> G["ARIA API and identity"]
+    G --> L["LangGraph investigation supervisor"]
+    L --> C["Jenkins and GitOps evidence"]
+    L --> K["Kubernetes and EKS evidence"]
+    L --> O["Prometheus, Loki and Tempo"]
+    L --> R["Markdown runbooks and verified memory"]
+    L --> M["Jira, documents and MCP tools"]
+    C --> X["Causal RCA"]
+    K --> X
+    O --> X
+    R --> X
+    M --> X
+    X --> P["Remediation proposal"]
+    P --> V["ReBAC and policy"]
+    V --> A["Approval when required"]
+    A --> E["Deterministic executor / GitOps PR"]
+    E --> Q["Recovery validation, audit and verified learning"]
+```
+
+Canonical AI assets:
+
+- [`docs/runbooks/`](docs/runbooks/README.md): version-controlled RAG corpus.
+- [`docs/architecture/`](docs/architecture/ARIA_SYSTEM_ARCHITECTURE.md): platform architecture.
+- [`docs/security/`](docs/security/ARIA_THREAT_MODEL.md): trust boundaries.
+- [`skills/`](skills/): portable ChatGPT/Codex, Claude and compatible-agent skills.
+- [`AGENTS.md`](AGENTS.md) and [`CLAUDE.md`](CLAUDE.md): repository-wide agent rules.
+
+Portable skills: `aria-investigate-incident`, `aria-author-runbook`, and `aria-add-mcp-connector`. MCP is a transport, not an authorization boundary; connectors start read-only and mutations remain governed.
+
 ## What this project does
 
 ```text

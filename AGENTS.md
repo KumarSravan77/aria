@@ -6,6 +6,13 @@ This repo is designed to be maintained by AI coding tools such as Claude Code, C
 
 Build and maintain an open-source AI-SRE incident investigation platform that combines Kubernetes observability, RAG-based runbooks, and policy-controlled self-healing.
 
+## Repository Skills and Runbooks
+
+- Read the relevant portable skill under `skills/` before investigation, runbook, or MCP connector work.
+- Treat `docs/runbooks/` as the canonical Markdown RAG corpus.
+- Only verified operational outcomes may influence learning or remediation ranking.
+- Keep README, architecture, runbooks, examples, correlation rules and tests aligned.
+
 ## Non-Negotiable Guardrails
 
 - Do not bypass `server/healing/policy_validator.py`.

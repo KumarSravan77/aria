@@ -6,6 +6,7 @@ from server.investigation.langgraph.checkpoints import InMemoryCheckpointStore
 from server.investigation.langgraph.nodes import InvestigationNodes
 from server.investigation.langgraph.routing import GraphRouter
 from server.investigation.langgraph.state_utils import route_budget
+from sqlalchemy.orm import Session
 
 @dataclass
 class LangGraphInvestigationWorkflow:
@@ -13,6 +14,10 @@ class LangGraphInvestigationWorkflow:
     router: GraphRouter = field(default_factory=GraphRouter)
     nodes: InvestigationNodes = field(default_factory=InvestigationNodes)
     checkpoints: InMemoryCheckpointStore = field(default_factory=InMemoryCheckpointStore)
+
+    @classmethod
+    def persistent(cls, db: Session) -> "LangGraphInvestigationWorkflow":
+        return cls(checkpoints=InMemoryCheckpointStore(db=db))
 
     def invoke(self, incident: dict[str, Any], active_incidents: int = 0) -> dict[str, Any]:
         investigation_id = str(uuid.uuid4())
@@ -23,6 +28,9 @@ class LangGraphInvestigationWorkflow:
             "incident_id": incident.get("incident_id") or incident.get("id") or investigation_id,
             "investigation_id": investigation_id,
             "service": incident.get("service") or incident.get("target") or "unknown",
+            "team": incident.get("team", "unknown"),
+            "environment": incident.get("environment", "unknown"),
+            "sensitivity": incident.get("sensitivity", "internal"),
             "severity": incident.get("severity", "P3"),
             "mode": mode,
             "signals": incident.get("signals", []),

@@ -104,6 +104,7 @@ from server.security_runtime.policy_violation_ingestor import PolicyViolationIng
 from server.chatops.interactive_approvals import InteractiveApprovalBuilder
 from server.chatops.threaded_updates import ThreadedUpdateBuilder
 from server.llm.guardrails import LLMGuardrails
+from server.db.models import AuditLog, OperationalMemoryEntry
 
 app = FastAPI(title="ARIA — Autonomous Resilience Intelligence Assistant", version="2.0.0")
 setup_otel(app)
@@ -293,7 +294,7 @@ def multi_agent_investigate(req: InvestigationRequest, db: Session = Depends(get
     if not authz.can_access_service(_user, req.service):
         raise HTTPException(status_code=403, detail="ReBAC denied multi-agent investigation for this service")
     # Pass memory items so RemediationRankerAgent can weight by past remediations
-    memory_items = OperationalMemory(db).recall(req.service).get("items", [])
+    memory_items = OperationalMemory(db).recall(req.service, team=None if _user.role == "admin" else _user.team, environment=req.environment, verified_only=True).get("items", [])
     return multi_agent.investigate(req.model_dump(), context={"user": _user, "memory_items": memory_items})
 
 @app.post("/slo/evaluate")
@@ -313,30 +314,65 @@ def memory_record(payload: dict, db: Session = Depends(get_db), _user: UserConte
     service = payload.get("service", "unknown")
     if not authz.can_access_service(_user, service):
         raise HTTPException(status_code=403, detail="ReBAC denied memory write for this service")
-    result = OperationalMemory(db).record(
-        service=service,
-        incident_id=payload.get("incident_id", "unknown"),
-        outcome=payload.get("outcome", "unknown"),
-        remediation=payload.get("remediation", "unknown"),
-        metadata={"recorded_by": _user.id, **payload.get("metadata", {})},
-    )
-    # Feed outcome back into RL optimizer so it learns from this incident
-    meta = payload.get("metadata", {})
-    _rl.update(
-        service=service,
-        probable_cause=meta.get("probable_cause", "unknown"),
-        severity=payload.get("severity", "P2"),
-        action=payload.get("remediation", "unknown"),
-        success="mitigat" in payload.get("outcome", "").lower() or "resolved" in payload.get("outcome", "").lower(),
-        mttr_seconds=meta.get("mttr_seconds"),
-    )
+    try:
+        result = OperationalMemory(db).record(
+            service=service,
+            incident_id=payload.get("incident_id", "unknown"),
+            outcome=payload.get("outcome", "unknown"),
+            remediation=payload.get("remediation", "unknown"),
+            metadata={"recorded_by": _user.id, **payload.get("metadata", {})},
+            team=_user.team,
+            environment=payload.get("environment", "unknown"),
+            incident_type=payload.get("incident_type", "unknown"),
+            root_cause=payload.get("root_cause"),
+            evidence_references=payload.get("evidence_references", []),
+            runbook_id=payload.get("runbook_id"),
+            runbook_version=payload.get("runbook_version"),
+            model_version=payload.get("model_version"),
+            prompt_version=payload.get("prompt_version"),
+            confidence=payload.get("confidence"),
+            remediation_result=payload.get("remediation_result", {}),
+            recovery_metrics=payload.get("recovery_metrics", {}),
+            sensitivity=payload.get("sensitivity", "internal"),
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    # Candidate memories never influence ranking until independently verified.
     return result
 
 @app.get("/memory/{service}")
 def memory_recall(service: str, db: Session = Depends(get_db), _user: UserContext = Depends(require_auth)):
     if not authz.can_access_service(_user, service):
         raise HTTPException(status_code=403, detail="ReBAC denied memory read for this service")
-    return OperationalMemory(db).recall(service)
+    return OperationalMemory(db).recall(service, team=None if _user.role == "admin" else _user.team)
+
+@app.post("/memory/{entry_id}/verify")
+def memory_verify(entry_id: int, db: Session = Depends(get_db), _user: UserContext = Depends(require_auth)):
+    if _user.role not in {"incident-commander", "admin"}:
+        raise HTTPException(status_code=403, detail="Independent incident-commander verification required")
+    memory = OperationalMemory(db)
+    row = db.get(OperationalMemoryEntry, entry_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="Memory entry not found")
+    if not authz.can_access_service(_user, row.service):
+        raise HTTPException(status_code=403, detail="ReBAC denied memory verification")
+    try:
+        result = memory.verify(entry_id, _user.id or "unknown")
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    item = result["item"]
+    meta = item.get("metadata", {})
+    _rl.update(
+        service=item["service"],
+        probable_cause=item.get("root_cause") or meta.get("probable_cause", "unknown"),
+        severity=meta.get("severity", "P2"),
+        action=item["remediation"],
+        success="mitigat" in item["outcome"].lower() or "resolved" in item["outcome"].lower(),
+        mttr_seconds=meta.get("mttr_seconds"),
+    )
+    db.add(AuditLog(actor=_user.id or "unknown", action="memory.verify", resource_type="operational_memory", resource_id=str(entry_id), metadata_json={"service": item["service"], "incident_id": item["incident_id"]}))
+    db.commit()
+    return result
 
 @app.get("/forecast/{service}")
 def forecast_incident(service: str, db: Session = Depends(get_db), _user: UserContext = Depends(require_auth)):
