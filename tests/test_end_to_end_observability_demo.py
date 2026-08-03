@@ -25,7 +25,7 @@ def test_gateway_generates_span_metrics_and_routes_all_signals():
     assert "spanmetrics" in config["connectors"]
     assert "spanmetrics" in config["service"]["pipelines"]["traces"]["exporters"]
     assert "spanmetrics" in config["service"]["pipelines"]["metrics"]["receivers"]
-    assert "otlphttp/loki" in config["service"]["pipelines"]["logs"]["exporters"]
+    assert config["service"]["pipelines"]["logs"]["exporters"] == ["kafka/logs"]
 
 
 def test_grafana_has_trace_log_metric_correlation():

@@ -39,10 +39,6 @@ data:
         tls: {insecure: true}
         sending_queue: {enabled: true, queue_size: 10000, storage: file_storage/queue}
         retry_on_failure: {enabled: true, max_elapsed_time: 0}
-      otlphttp/loki:
-        endpoint: http://loki-gateway.telemetry.svc.cluster.local/otlp
-        sending_queue: {enabled: true, queue_size: 10000, storage: file_storage/queue}
-        retry_on_failure: {enabled: true, max_elapsed_time: 0}
     connectors:
       spanmetrics:
         histogram:
@@ -58,6 +54,8 @@ data:
       extensions: [health_check, file_storage/queue]
       telemetry: {metrics: {address: 0.0.0.0:8888}}
       pipelines:
-        logs: {receivers: [otlp], processors: [memory_limiter, transform/redact, filter/debug, batch], exporters: [kafka/logs, otlphttp/loki]}
+        # Kafka/Redpanda is the single durable log path. Vector owns hot/archive
+        # routing so a record cannot be written to Loki twice.
+        logs: {receivers: [otlp], processors: [memory_limiter, transform/redact, filter/debug, batch], exporters: [kafka/logs]}
         metrics: {receivers: [otlp, spanmetrics], processors: [memory_limiter, batch], exporters: [prometheus]}
         traces: {receivers: [otlp], processors: [memory_limiter, batch], exporters: [otlp/tempo, spanmetrics]}

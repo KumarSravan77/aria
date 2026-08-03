@@ -37,3 +37,4 @@ build/
 *.log
 kind-kubeconfig
 incident_investigator.db
+.terraform/

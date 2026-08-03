@@ -15,6 +15,10 @@ def test_capacity_plan_is_explicit_about_100tb_assumptions():
     plan = capacity_plan(100, peak_multiplier=3, replication_factor=3)
     assert plan["design_peak_mbps"] > plan["average_ingest_mbps"]
     assert plan["minimum_log_partitions"] >= 3
+    assert plan["design_peak_events_per_second"] > plan["average_events_per_second"]
+    assert plan["minimum_collector_replicas"] >= 2
+    assert plan["minimum_gateway_replicas"] >= 3
+    assert plan["estimated_archive_storage_tb"] > plan["estimated_hot_storage_tb"]
     assert "Planning estimate" in plan["disclaimer"]
 
 

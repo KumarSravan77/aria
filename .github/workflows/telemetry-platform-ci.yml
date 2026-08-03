@@ -18,12 +18,19 @@ jobs:
       - uses: azure/setup-kubectl@v4
         with: {version: v1.31.0}
       - run: kubectl kustomize telemetry/overlays/local > /tmp/aria-telemetry.yaml
+      - run: kubectl kustomize telemetry/overlays/scale > /tmp/aria-telemetry-scale.yaml
+      - run: kubectl kustomize telemetry/overlays/production-small > /tmp/aria-telemetry-production-small.yaml
+      - run: kubectl kustomize telemetry/overlays/production-regional > /tmp/aria-telemetry-production-regional.yaml
       - run: kubectl kustomize k8s/apps > /tmp/aria-demo-apps.yaml
       - run: test -s /tmp/aria-telemetry.yaml
       - uses: helm/kind-action@v1
         with: {install_only: true}
       - run: helm dependency build telemetry/helm
       - run: helm lint telemetry/helm
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform -chdir=telemetry/terraform fmt -check
+      - run: terraform -chdir=telemetry/terraform init -backend=false
+      - run: terraform -chdir=telemetry/terraform validate
   scan:
     runs-on: ubuntu-latest
     steps:

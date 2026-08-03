@@ -19,6 +19,7 @@ data:
           .aria_received_at = now()
           .tenant = get(.resource.attributes, ["tenant.id"]) ?? "default"
           .namespace = get(.resource.attributes, ["k8s.namespace.name"]) ?? "unknown"
+          .service_name = get(.resource.attributes, ["service.name"]) ?? "unknown"
       route_priority:
         type: route
         inputs: [normalize]

@@ -12,7 +12,8 @@
 - Capacity planning API with explicit assumptions
 - Pipeline health evidence analyzer and AI agent
 - Recommendation-only telemetry remediation API and policy specification
-- Local and scale Kustomize overlays
+- Local, scale, production-small, and production-regional Kustomize overlays
+- Terraform for encrypted production archive storage and lifecycle controls
 - Argo CD application and Helm backend dependencies
 - k6 workload and Chaos Mesh scenarios
 - Static asset, safety contract, and Python tests
@@ -21,6 +22,7 @@
 - W3C HTTP context propagation and trace-correlated structured application logs
 - Prometheus exemplars, span-derived RED metrics, and Grafana trace/log/metric links
 - Automated cross-backend verification script and slow-dependency scenario
+- Single durable log delivery path (gateway to Kafka/Redpanda to Vector) that avoids duplicate Loki ingestion
 
 ## Environment-dependent validation
 

@@ -1,0 +1,32 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: telemetry
+labels:
+  - pairs: {telemetry.aria.io/profile: production-small}
+    includeSelectors: false
+resources:
+  - ../../base
+  - ../../otel/agent
+  - ../../otel/gateway
+  - ../../buffering
+  - ../../processing
+patches:
+  - target: {kind: Deployment, name: otel-gateway}
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 3
+      - op: replace
+        path: /spec/template/spec/topologySpreadConstraints/0/whenUnsatisfiable
+        value: DoNotSchedule
+  - target: {kind: StatefulSet, name: redpanda}
+    patch: |-
+      - op: replace
+        path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
+        value: 250Gi
+  - target: {kind: Deployment, name: vector-consumer}
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 3
+

@@ -34,7 +34,7 @@ data:
       filter/noise:
         error_mode: ignore
         traces:
-          span: ['attributes["http.route"] == "/health" or attributes["http.route"] == "/ready"']
+          span: ['attributes["http.route"] == "/health" or attributes["http.route"] == "/healthz" or attributes["http.route"] == "/livez" or attributes["http.route"] == "/ready" or attributes["http.route"] == "/readyz" or attributes["http.route"] == "/ping" or attributes["http.route"] == "/status" or attributes["http.route"] == "/metrics"']
       batch: {timeout: 2s, send_batch_size: 2048, send_batch_max_size: 4096}
     exporters:
       otlp/gateway:

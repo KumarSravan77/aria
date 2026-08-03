@@ -21,6 +21,8 @@ Kubernetes workloads
 |---|---|---|
 | local | Laptop/Kind functional validation | Monolithic backends and MinIO |
 | scale | HA and failure testing | Distributed Loki, Thanos and external object storage |
+| production-small | Single production cluster with three-way ingestion and buffering | External object storage and selected hot backend |
+| production-regional | Zone-spread regional ingestion with larger autoscaling envelopes | External object storage and regional hot backend |
 | search | Full-text and security investigations | OpenSearch instead of Loki hot storage |
 
 The OpenSearch and Loki profiles are alternatives. Running both is justified only when search requirements and cost allocation are documented.
@@ -35,7 +37,7 @@ The OpenSearch and Loki profiles are alternatives. Running both is justified onl
 - Debug logs are routed away from the hot path.
 - PII-like email and authorization patterns are redacted before durable storage.
 
-Local `emptyDir` gateway queues prove queue behavior but do not survive node loss. Production overlays must use durable volumes or rely on a short gateway queue plus Kafka acknowledgements.
+Local `emptyDir` gateway queues prove queue behavior but do not survive node loss. The production profiles intentionally use the gateway queue only as a short shock absorber; acknowledged Kafka/Redpanda records are the durable replay boundary. This avoids attaching a single writable volume to a horizontally scaled Deployment.
 
 ## Tenant model
 
@@ -43,7 +45,13 @@ Every exporting namespace carries `telemetry.aria.io/tenant`. OTel adds Kubernet
 
 ## Capacity planning
 
-`GET /telemetry/capacity` exposes transparent planning math. A 100 TB/day plan is an estimate, not a benchmark claim. Before production sizing, replay representative payload sizes, compression, cardinality, query mixes, broker loss, object-store latency, and regional failure.
+`GET /telemetry/capacity` exposes transparent planning math for bytes and events per second, design peak, partitions, collector/gateway replicas, Kafka storage, and hot/archive storage. A 100 TB/day plan is an estimate, not a benchmark claim. Before production sizing, replay representative payload sizes, compression, cardinality, query mixes, broker loss, object-store latency, and regional failure.
+
+The Terraform root under `telemetry/terraform` provisions a private, KMS-encrypted archive bucket with versioning and lifecycle tiers. It assumes the Kubernetes cluster already exists and deliberately creates no static cloud credentials.
+
+## Log delivery invariant
+
+The gateway writes logs to Kafka/Redpanda only. Vector is the sole consumer responsible for Loki hot storage and object archive routing. This prevents the direct-gateway and buffered-consumer paths from creating duplicate log records.
 
 ## Safe remediation
 

@@ -1,0 +1,51 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: telemetry
+labels:
+  - pairs: {telemetry.aria.io/profile: production-regional}
+    includeSelectors: false
+resources:
+  - ../../base
+  - ../../otel/agent
+  - ../../otel/gateway
+  - ../../buffering
+  - ../../processing
+patches:
+  - target: {kind: Deployment, name: otel-gateway}
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 6
+      - op: replace
+        path: /spec/template/spec/topologySpreadConstraints/0/topologyKey
+        value: topology.kubernetes.io/zone
+      - op: replace
+        path: /spec/template/spec/topologySpreadConstraints/0/whenUnsatisfiable
+        value: DoNotSchedule
+  - target: {kind: HorizontalPodAutoscaler, name: otel-gateway}
+    patch: |-
+      - op: replace
+        path: /spec/minReplicas
+        value: 6
+      - op: replace
+        path: /spec/maxReplicas
+        value: 60
+  - target: {kind: StatefulSet, name: redpanda}
+    patch: |-
+      - op: replace
+        path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
+        value: 2Ti
+  - target: {kind: Deployment, name: vector-consumer}
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 6
+  - target: {kind: ScaledObject, name: vector-kafka-lag}
+    patch: |-
+      - op: replace
+        path: /spec/minReplicaCount
+        value: 6
+      - op: replace
+        path: /spec/maxReplicaCount
+        value: 100
+
