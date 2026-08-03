@@ -35,8 +35,31 @@ class SlackAdapter(CollaborationAdapter):
             self._post("conversations.setPurpose", {"channel": channel_id, "purpose": purpose[:250]})
         return {"provider": "slack", "channel_id": channel_id, "channel_name": safe}
     def post_message(self, channel_id: str, message: str, metadata: dict | None = None) -> dict:
-        data = self._post("chat.postMessage", {"channel": channel_id, "text": message})
+        payload = {"channel": channel_id, "text": message}
+        if metadata and metadata.get("blocks"):
+            payload["blocks"] = metadata["blocks"]
+        if metadata and metadata.get("thread_ts"):
+            payload["thread_ts"] = metadata["thread_ts"]
+        data = self._post("chat.postMessage", payload)
         return {"provider": "slack", "channel_id": channel_id, "posted": True, "ts": data.get("ts")}
+
+class TeamsAdapter(CollaborationAdapter):
+    """Posts incident cards through a Teams Workflow incoming-webhook URL.
+
+    Teams webhooks cannot create channels, so incidents use the configured channel
+    and keep their incident id as the conversation correlation key.
+    """
+    def __init__(self, webhook_url: str | None = None):
+        self.webhook_url = webhook_url or os.getenv("TEAMS_WEBHOOK_URL")
+        if not self.webhook_url:
+            raise ValueError("TEAMS_WEBHOOK_URL is required for TeamsAdapter")
+    def create_channel(self, name: str, purpose: str = "") -> dict:
+        return {"provider": "teams", "channel_id": "configured-workflow", "channel_name": name, "purpose": purpose}
+    def post_message(self, channel_id: str, message: str, metadata: dict | None = None) -> dict:
+        body = {"type": "message", "attachments": [{"contentType": "application/vnd.microsoft.card.adaptive", "contentUrl": None, "content": {"$schema": "http://adaptivecards.io/schemas/adaptive-card.json", "type": "AdaptiveCard", "version": "1.4", "body": [{"type": "TextBlock", "text": message, "wrap": True}]}}]}
+        r = requests.post(self.webhook_url, json=body, timeout=20)
+        r.raise_for_status()
+        return {"provider": "teams", "channel_id": channel_id, "posted": True}
 
 class MattermostAdapter(CollaborationAdapter):
     def __init__(self, base_url: str | None = None, token: str | None = None, team_id: str | None = None):
@@ -66,5 +89,6 @@ class MattermostAdapter(CollaborationAdapter):
 def get_adapter(provider: str | None = None) -> CollaborationAdapter:
     provider = (provider or os.getenv("COLLABORATION_PROVIDER") or "stdout").lower()
     if provider == "slack": return SlackAdapter()
+    if provider == "teams": return TeamsAdapter()
     if provider == "mattermost": return MattermostAdapter()
     return StdoutAdapter()

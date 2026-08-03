@@ -58,6 +58,7 @@ from server.chaos.validation_engine import ChaosValidationEngine
 from server.chaos.chaos_reporter import ChaosReporter
 from server.chaos.experiment_runner import ChaosExperimentRunner
 from server.telemetry.router import router as telemetry_router
+from server.oncall.router import router as oncall_router
 
 from server.agents.orchestrator import MultiAgentOrchestrator
 from server.agents.metrics_agent import MetricsAgent
@@ -107,6 +108,7 @@ from server.llm.guardrails import LLMGuardrails
 from server.db.models import AuditLog, OperationalMemoryEntry
 
 app = FastAPI(title="ARIA — Autonomous Resilience Intelligence Assistant", version="2.0.0")
+app.include_router(oncall_router)
 setup_otel(app)
 rag = RagService()
 analyzer = IncidentAnalyzer()

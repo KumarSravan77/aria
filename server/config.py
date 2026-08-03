@@ -24,6 +24,10 @@ class Settings(BaseSettings):
     collaboration_provider: str = 'stdout'
     slack_bot_token: str | None = None
     slack_default_channel: str | None = None
+    slack_signing_secret: str | None = None
+    teams_webhook_url: str | None = None
+    pagerduty_webhook_secret: str | None = None
+    public_base_url: str = 'http://localhost:8000'
     mattermost_url: str | None = None
     mattermost_token: str | None = None
     mattermost_team_id: str | None = None

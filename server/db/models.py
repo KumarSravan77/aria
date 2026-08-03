@@ -116,3 +116,25 @@ class InvestigationCheckpoint(Base):
     state_json: Mapped[dict] = mapped_column(JSON, default=dict)
     sensitivity: Mapped[str] = mapped_column(String(40), default="internal")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+
+class SDLCEvent(Base):
+    __tablename__ = "sdlc_events"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    event_id: Mapped[str] = mapped_column(String(120), unique=True, index=True)
+    event_type: Mapped[str] = mapped_column(String(80), index=True)
+    service: Mapped[str] = mapped_column(String(120), index=True)
+    environment: Mapped[str] = mapped_column(String(60), index=True, default="unknown")
+    actor: Mapped[str] = mapped_column(String(160), index=True, default="unknown")
+    revision: Mapped[Optional[str]] = mapped_column(String(160), nullable=True, index=True)
+    occurred_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, index=True)
+    payload: Mapped[dict] = mapped_column(JSON, default=dict)
+
+class ExternalIdentity(Base):
+    __tablename__ = "external_identities"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    aria_user_id: Mapped[str] = mapped_column(String(120), index=True)
+    provider: Mapped[str] = mapped_column(String(40), index=True)
+    external_user_id: Mapped[str] = mapped_column(String(160), index=True)
+    team: Mapped[str] = mapped_column(String(120), index=True, default="unknown")
+    verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)

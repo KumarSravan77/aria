@@ -32,6 +32,12 @@ The featured end-to-end demo uses a fictional Canadian bank—MapleTrust Bank—
 
 It is designed for SRE, DevOps, Platform Engineering, AIOps, DevSecOps, and LLMOps interviews.
 
+## On-call SRE copilot
+
+ARIA can receive Alertmanager and signed PagerDuty events, collaborate through Slack, Teams, or Mattermost, expose read-only investigation tools to MCP clients, correlate SDLC events with incidents, and preserve cross-surface identity and audit records. Production mutations remain behind ReBAC, policy, four-eyes approval, deterministic workers, and recovery validation.
+
+See `docs/ON_CALL_SRE_COPILOT.md` for the workflow and configuration.
+
 ## AI architecture and operating model
 
 ARIA correlates developer reports, CI/CD, changes, Kubernetes/EKS state, telemetry, security signals, Markdown runbooks and verified incident memory. AI produces evidence and recommendations; deterministic systems own mutations.

@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "aria-oncall": {
+      "command": "python",
+      "args": ["-m", "server.mcp.server"],
+      "cwd": "/absolute/path/to/aria",
+      "env": {"ARIA_API_URL": "http://localhost:8000", "ARIA_API_TOKEN": "inject-from-secret-manager"}
+    }
+  }
+}
