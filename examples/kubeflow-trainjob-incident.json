@@ -1,0 +1,9 @@
+{
+  "resource_kind": "TrainJob",
+  "resource_name": "fraud-model-training",
+  "namespace": "ml-platform",
+  "service": "fraud-model-training",
+  "symptoms": ["training workload remains pending"],
+  "signals": ["Unschedulable: insufficient nvidia.com/gpu"]
+}
+

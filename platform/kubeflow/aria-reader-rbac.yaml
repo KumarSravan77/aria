@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: aria-kubeflow-reader
+  namespace: aria
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: aria-kubeflow-reader
+rules:
+  - apiGroups: [kubeflow.org]
+    resources: [notebooks, profiles, poddefaults, experiments, trials, suggestions]
+    verbs: [get, list, watch]
+  - apiGroups: [pipelines.kubeflow.org]
+    resources: [pipelines, pipelineversions]
+    verbs: [get, list, watch]
+  - apiGroups: [trainer.kubeflow.org]
+    resources: [trainjobs, trainingruntimes, clustertrainingruntimes]
+    verbs: [get, list, watch]
+  - apiGroups: [sparkoperator.k8s.io]
+    resources: [sparkapplications, scheduledsparkapplications]
+    verbs: [get, list, watch]
+  - apiGroups: [""]
+    resources: [pods, events, persistentvolumeclaims]
+    verbs: [get, list, watch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: aria-kubeflow-reader
+subjects:
+  - kind: ServiceAccount
+    name: aria-kubeflow-reader
+    namespace: aria
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: aria-kubeflow-reader
+

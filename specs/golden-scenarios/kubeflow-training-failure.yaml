@@ -1,0 +1,23 @@
+id: GS-KUBEFLOW-001
+title: Kubeflow training workload failure
+service: fraud-model-training
+owner: ml-platform
+input: examples/kubeflow-trainjob-incident.json
+correlation:
+  resource: trainer.kubeflow.org/v1alpha1/TrainJob
+  evidence:
+    - custom-resource status conditions
+    - Kubernetes Pod conditions and events
+    - Prometheus resource and GPU metrics
+    - Loki worker logs
+    - Tempo training-orchestrator traces
+    - Headlamp resource and ownership graph
+expected:
+  failure_mode: GPUScheduling
+  runbook: RB-ML-001
+  mutation: none
+safety:
+  read_only: true
+  require_rebac: true
+  recommendations_require_approval: true
+

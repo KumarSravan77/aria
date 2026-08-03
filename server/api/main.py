@@ -59,6 +59,7 @@ from server.chaos.chaos_reporter import ChaosReporter
 from server.chaos.experiment_runner import ChaosExperimentRunner
 from server.telemetry.router import router as telemetry_router
 from server.oncall.router import router as oncall_router
+from server.kubeflow.router import router as kubeflow_router
 
 from server.agents.orchestrator import MultiAgentOrchestrator
 from server.agents.metrics_agent import MetricsAgent
@@ -887,3 +888,4 @@ app.include_router(rag_types_router)
 app.include_router(ai_runtime_router)
 app.include_router(kubernetes_internals_router)
 app.include_router(telemetry_router)
+app.include_router(kubeflow_router)

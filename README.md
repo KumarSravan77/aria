@@ -28,6 +28,8 @@ This repository is a local-first, GitHub-ready AI-SRE project that demonstrates 
 
 ARIA now also includes a Kubernetes telemetry data plane under `telemetry/`: OpenTelemetry node agents and gateways, Kafka-compatible buffering, Vector processing, scalable storage profiles, pipeline dashboards, load/failure scenarios, capacity planning, and a recommendation-only telemetry intelligence agent. See `docs/architecture/TELEMETRY_DATA_PLANE.md` and `docs/TELEMETRY_IMPLEMENTATION_STATUS.md`.
 
+ARIA includes a read-only Kubeflow operations module that inspects Notebook, Pipeline, Katib, Trainer and Spark custom resources, classifies common ML workload failures, provides an authorized runbook, and can link evidence to the upstream Headlamp Kubeflow operator view. See `docs/architecture/KUBEFLOW_HEADLAMP_OPERATIONS.md` and run `make kubeflow-investigate` for the API demo.
+
 The featured end-to-end demo uses a fictional Canadian bank—MapleTrust Bank—with an instrumented banking → fraud detection → transaction ledger request path. It provides W3C context propagation, trace-correlated JSON logs, Prometheus exemplars, span-derived RED metrics, and Grafana links between Prometheus, Loki, and Tempo. It is not affiliated with CIBC, RBC, or another real bank. See `docs/END_TO_END_OBSERVABILITY_DEMO.md`.
 
 It is designed for SRE, DevOps, Platform Engineering, AIOps, DevSecOps, and LLMOps interviews.

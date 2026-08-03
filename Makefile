@@ -29,6 +29,11 @@ telemetry-load: ## Send OTLP log traffic; set RATE, DURATION and OTLP_HTTP as ne
 telemetry-capacity: ## Calculate the requested capacity; set TB_PER_DAY
 	curl -s "http://localhost:8080/telemetry/capacity?tb_per_day=$${TB_PER_DAY:-1}" -H '$(AUTH_HEADER)' | jq
 
+kubeflow-investigate: ## Run the read-only Kubeflow training incident demo
+	curl -s -X POST -H '$(AUTH_HEADER)' -H 'Content-Type: application/json' \
+	  http://localhost:8080/kubeflow/investigate \
+	  -d @examples/kubeflow-trainjob-incident.json | jq
+
 local-up: bootstrap-env ## Start local Docker services
 	docker compose up -d --build
 
