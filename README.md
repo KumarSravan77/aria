@@ -30,6 +30,14 @@ ARIA now also includes a Kubernetes telemetry data plane under `telemetry/`: Ope
 
 ARIA includes a read-only Kubeflow operations module that inspects Notebook, Pipeline, Katib, Trainer and Spark custom resources, classifies common ML workload failures, provides an authorized runbook, and can link evidence to the upstream Headlamp Kubeflow operator view. See `docs/architecture/KUBEFLOW_HEADLAMP_OPERATIONS.md` and run `make kubeflow-investigate` for the API demo.
 
+ARIA can publish signed, versioned incident intelligence to
+[On-Call SRE Agent](https://github.com/KumarSravan77/on-call-sre-agent), including
+evidence, confidence, recommendations and W3C trace context. OpenTelemetry can
+export the combined AI workflow to self-hosted Opik. ARIA classifies HA recovery
+lanes but does not bypass On-Call approval for database, cluster, traffic or
+regional failover. See `docs/ARIA_ON_CALL_INTEGRATION.md` and
+`docs/HA_AUTO_RECOVERY.md`.
+
 The featured end-to-end demo uses a fictional Canadian bank—MapleTrust Bank—with an instrumented banking → fraud detection → transaction ledger request path. It provides W3C context propagation, trace-correlated JSON logs, Prometheus exemplars, span-derived RED metrics, and Grafana links between Prometheus, Loki, and Tempo. It is not affiliated with CIBC, RBC, or another real bank. See `docs/END_TO_END_OBSERVABILITY_DEMO.md`.
 
 It is designed for SRE, DevOps, Platform Engineering, AIOps, DevSecOps, and LLMOps interviews.

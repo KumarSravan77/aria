@@ -60,6 +60,7 @@ from server.chaos.experiment_runner import ChaosExperimentRunner
 from server.telemetry.router import router as telemetry_router
 from server.oncall.router import router as oncall_router
 from server.kubeflow.router import router as kubeflow_router
+from server.integrations.on_call_sre import router as on_call_sre_router
 
 from server.agents.orchestrator import MultiAgentOrchestrator
 from server.agents.metrics_agent import MetricsAgent
@@ -98,6 +99,7 @@ from server.platform.tool_registry import list_tools as list_platform_tools
 from server.recovery.recovery_planner import RecoveryPlanner
 from server.recovery.rto_rpo_tracker import RtoRpoTracker
 from server.recovery.recovery_validator import RecoveryValidator
+from server.recovery.auto_recovery import AutoRecoveryCoordinator, RecoveryObservation
 from server.observability.correlator import ObservabilityCorrelator
 from server.slo.burn_rate_alerts import SloBurnRateAlertEngine
 from server.chaos.scheduler import ChaosScheduler
@@ -152,6 +154,7 @@ _canary_planner = CanaryPlanner()
 _recovery_planner = RecoveryPlanner()
 _rto_rpo_tracker = RtoRpoTracker()
 _recovery_validator = RecoveryValidator()
+_auto_recovery = AutoRecoveryCoordinator()
 _obs_correlator = ObservabilityCorrelator(prometheus, loki, tempo, hubble)
 slo_engine = SloEngine()                          # must be before _slo_alerts
 _slo_alerts = SloBurnRateAlertEngine(slo_engine)
@@ -216,6 +219,25 @@ def recovery_validate(payload: dict, _user: UserContext = Depends(require_auth))
         rto_met=bool(payload.get("rto_met", True)),
         rpo_met=bool(payload.get("rpo_met", True)),
     )
+
+
+@app.post("/recovery/coordinate")
+def recovery_coordinate(payload: dict, _user: UserContext = Depends(require_auth)):
+    service = payload.get("service", "checkout-api")
+    if not authz.can_access_service(_user, service):
+        raise HTTPException(status_code=403, detail="ReBAC denied recovery coordination")
+    observation = RecoveryObservation(
+        service=service,
+        failure_type=payload.get("failure_type", "unknown"),
+        environment=payload.get("environment", "production"),
+        desired_replicas=max(1, int(payload.get("desired_replicas", 1))),
+        ready_replicas=max(0, int(payload.get("ready_replicas", 0))),
+        available_zones=max(0, int(payload.get("available_zones", 0))),
+        traffic_healthy=bool(payload.get("traffic_healthy", False)),
+        data_healthy=bool(payload.get("data_healthy", True)),
+        alerts_resolved=bool(payload.get("alerts_resolved", False)),
+    )
+    return {"service": service, **_auto_recovery.coordinate(observation)}
 
 
 @app.post("/recovery/rto-rpo")
@@ -889,3 +911,4 @@ app.include_router(ai_runtime_router)
 app.include_router(kubernetes_internals_router)
 app.include_router(telemetry_router)
 app.include_router(kubeflow_router)
+app.include_router(on_call_sre_router)

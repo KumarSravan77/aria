@@ -34,6 +34,11 @@ class Settings(BaseSettings):
 
     otel_enabled: bool = False
     otel_endpoint: str | None = None
+    ai_observability_backend: str = 'otlp'  # otlp | opik | disabled
+
+    on_call_sre_url: str | None = None
+    on_call_sre_integration_secret: str | None = None
+    on_call_sre_timeout_seconds: float = 5.0
 
     rebac_backend: str = 'local'  # local | openfga
     openfga_api_url: str | None = None
