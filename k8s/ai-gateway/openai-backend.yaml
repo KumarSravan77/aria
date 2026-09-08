@@ -1,0 +1,40 @@
+# Example cloud provider backend. Create the referenced Secret out-of-band.
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: Backend
+metadata:
+  name: openai
+  namespace: ai-gateway
+spec:
+  endpoints:
+    - fqdn:
+        hostname: api.openai.com
+        port: 443
+---
+apiVersion: aigateway.envoyproxy.io/v1beta1
+kind: BackendSecurityPolicy
+metadata:
+  name: openai-api-key
+  namespace: ai-gateway
+spec:
+  type: APIKey
+  apiKey:
+    secretRef:
+      name: openai-api-key
+---
+apiVersion: aigateway.envoyproxy.io/v1beta1
+kind: AIServiceBackend
+metadata:
+  name: openai
+  namespace: ai-gateway
+spec:
+  schema:
+    name: OpenAI
+    prefix: /v1
+  backendRef:
+    group: gateway.envoyproxy.io
+    kind: Backend
+    name: openai
+  backendSecurityPolicyRef:
+    group: aigateway.envoyproxy.io
+    kind: BackendSecurityPolicy
+    name: openai-api-key

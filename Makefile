@@ -522,3 +522,64 @@ k8s-internals-summary:
 
 k8s-etcd-backups:
 	curl -s -H "Authorization: Bearer $${API_TOKEN:-dev-user-token}" http://localhost:8080/kubernetes-internals/etcd/backups | jq .
+
+AI_GATEWAY_VERSION ?= v1.1.0
+ENVOY_GATEWAY_VERSION ?= v1.8.1
+
+ai-gateway-install: ## Install Envoy Gateway and AI Gateway control planes
+	helm upgrade -i eg oci://docker.io/envoyproxy/gateway-helm --version $(ENVOY_GATEWAY_VERSION) --namespace envoy-gateway-system --create-namespace -f https://raw.githubusercontent.com/envoyproxy/ai-gateway/main/manifests/envoy-gateway-values.yaml
+	kubectl wait --timeout=2m -n envoy-gateway-system deployment/envoy-gateway --for=condition=Available
+	helm upgrade -i aieg-crd oci://docker.io/envoyproxy/ai-gateway-crds-helm --version $(AI_GATEWAY_VERSION) --namespace envoy-ai-gateway-system --create-namespace
+	helm upgrade -i aieg oci://docker.io/envoyproxy/ai-gateway-helm --version $(AI_GATEWAY_VERSION) --namespace envoy-ai-gateway-system --create-namespace
+	kubectl wait --timeout=2m -n envoy-ai-gateway-system deployment/ai-gateway-controller --for=condition=Available
+
+ai-gateway-apply: ## Apply ARIA AI Gateway resources (provider Secret must exist)
+	kubectl apply -f k8s/ai-gateway/gateway.yaml
+	kubectl apply -f k8s/ai-gateway/openai-backend.yaml
+	kubectl apply -f k8s/ai-gateway/route.yaml
+
+ai-gateway-status: ## Show Envoy AI Gateway resources
+	kubectl get pods -n envoy-gateway-system
+	kubectl get pods -n envoy-ai-gateway-system
+	kubectl get gateway,aigatewayroute,aiservicebackend,backendsecuritypolicy -n ai-gateway
+
+dataset-build: ## Build immutable, sanitized ARIA SFT dataset splits
+	python3 -m scripts.modelops dataset-build --source datasets/finetuning/raw/aria_sft_seed.jsonl --output datasets/finetuning/processed --version v1
+
+dataset-validate: ## Validate dataset schema and split hashes
+	python3 -m scripts.modelops dataset-validate --manifest datasets/finetuning/processed/manifest.json
+
+train-lora-plan: dataset-build ## Display the local LoRA plan without downloading a model
+	python3 -m training.sft.train --config training/configs/lora-local-smoke.yaml --dry-run
+
+train-lora: dataset-build ## Fine-tune the small local model
+	python3 -m training.sft.train --config training/configs/lora-local-smoke.yaml
+
+train-qlora-plan: dataset-build ## Validate the CUDA QLoRA plan
+	python3 -m training.sft.train --config training/configs/qlora-cuda-smoke.yaml --dry-run
+
+train-qlora: dataset-build ## QLoRA fine-tune on supported NVIDIA CUDA hardware
+	python3 -m training.sft.train --config training/configs/qlora-cuda-smoke.yaml
+
+eval-model-smoke: ## Generate deterministic lifecycle scorecard
+	python3 -m scripts.modelops evaluate --predictions evaluation/fixtures/smoke_predictions.jsonl --model smoke-baseline --output evaluation/reports/smoke-scorecard.json
+	python3 -m scripts.modelops promotion-check --scorecard evaluation/reports/smoke-scorecard.json
+
+eval-model-real: ## Compare base and trained LoRA adapter on frozen benchmark
+	.venv-modelops/bin/python -m evaluation.generate_predictions --output evaluation/reports/base-predictions.jsonl
+	.venv-modelops/bin/python -m scripts.modelops evaluate --predictions evaluation/reports/base-predictions.jsonl --model Qwen2.5-0.5B-base --output evaluation/reports/base-scorecard.json
+	.venv-modelops/bin/python -m evaluation.generate_predictions --adapter artifacts/aria-qwen-lora-smoke --output evaluation/reports/candidate-predictions.jsonl
+	.venv-modelops/bin/python -m scripts.modelops evaluate --predictions evaluation/reports/candidate-predictions.jsonl --model aria-qwen-lora-smoke --output evaluation/reports/candidate-scorecard.json
+
+modelops-test: ## Run model lifecycle and gateway regression tests
+	python3 -m pytest tests/test_model_finetuning_platform.py tests/test_envoy_ai_gateway_integration.py -q
+
+vllm-up: ## Start NVIDIA vLLM serving profile
+	docker compose -f serving/vllm/docker-compose.vllm.yml up -d
+
+vllm-down: ## Stop NVIDIA vLLM serving profile
+	docker compose -f serving/vllm/docker-compose.vllm.yml down
+
+ai-gateway-apply-self-hosted: ## Route aria-private to self-hosted vLLM
+	kubectl apply -f k8s/ai-gateway/vllm-backend.yaml
+	kubectl apply -f k8s/ai-gateway/route-self-hosted.yaml

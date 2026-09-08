@@ -35,6 +35,7 @@ class OllamaClient:
             data = response.json()
             return {
                 "available": True,
+                "provider": "ollama-local",
                 "model": self.model,
                 "response": data.get("response", ""),
                 "raw": data,
@@ -42,6 +43,7 @@ class OllamaClient:
         except Exception as exc:  # pragma: no cover - exercised in integration runs
             return {
                 "available": False,
+                "provider": "ollama-local",
                 "model": self.model,
                 "response": "Ollama is unavailable. Falling back to deterministic analysis and retrieved runbooks.",
                 "error": str(exc),

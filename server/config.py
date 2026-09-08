@@ -46,9 +46,19 @@ class Settings(BaseSettings):
     openfga_authorization_model_id: str | None = None
     openfga_token: str | None = None
 
+    # Production/default integration uses Envoy AI Gateway so provider
+    # credentials and routing stay out of the ARIA application.
+    llm_enabled: bool = False
+    llm_provider: str = 'envoy-ai-gateway'  # envoy-ai-gateway | ollama
+    llm_timeout_seconds: int = 90
+    ai_gateway_base_url: str = 'http://localhost:1975'
+    ai_gateway_model: str = 'aria-reasoning'
+    ai_gateway_api_key: str | None = None
+    ai_gateway_tenant_id: str = 'aria'
+
+    # Supported direct local fallback for developer/offline use.
     ollama_base_url: str = 'http://localhost:11434'
     ollama_model: str = 'llama3.1:8b'
-    llm_enabled: bool = False
 
     argocd_api_url: str | None = None
     argocd_token: str | None = None

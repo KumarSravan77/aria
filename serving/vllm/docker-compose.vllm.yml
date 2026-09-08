@@ -1,0 +1,33 @@
+services:
+  vllm:
+    image: vllm/vllm-openai:v0.6.4.post1
+    command:
+      - --model
+      - ${ARIA_MODEL_PATH:-Qwen/Qwen2.5-0.5B-Instruct}
+      - --served-model-name
+      - aria-private
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+      - --max-model-len
+      - ${ARIA_MAX_MODEL_LEN:-4096}
+    environment:
+      HUGGING_FACE_HUB_TOKEN: ${HUGGING_FACE_HUB_TOKEN:-}
+    ports:
+      - "8001:8000"
+    volumes:
+      - ../../artifacts:/models:ro
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: [CMD, curl, -f, http://localhost:8000/health]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 120s

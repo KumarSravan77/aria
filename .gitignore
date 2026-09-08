@@ -7,6 +7,7 @@ __pycache__/
 .coverage
 htmlcov/
 .venv/
+.venv*/
 venv/
 
 # Local env/secrets
@@ -21,6 +22,11 @@ venv/
 chroma/
 data/
 tmp/
+artifacts/
+models/registry/entries/
+datasets/finetuning/processed/
+evaluation/reports/
+mlruns/
 
 # OS/editor
 .DS_Store

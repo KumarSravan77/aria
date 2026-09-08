@@ -1,0 +1,29 @@
+name: ARIA ModelOps CI
+
+on:
+  pull_request:
+    paths:
+      - "training/**"
+      - "datasets/finetuning/**"
+      - "evaluation/**"
+      - "models/**"
+      - "serving/**"
+      - "tests/test_model_finetuning_platform.py"
+  push:
+    branches: [main]
+
+jobs:
+  validate-model-lifecycle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install pytest pyyaml
+      - run: python -m scripts.modelops dataset-build --source datasets/finetuning/raw/aria_sft_seed.jsonl --output datasets/finetuning/processed --version ci
+      - run: python -m scripts.modelops dataset-validate --manifest datasets/finetuning/processed/manifest.json
+      - run: python -m training.sft.train --config training/configs/lora-local-smoke.yaml --dry-run
+      - run: python -m scripts.modelops evaluate --predictions evaluation/fixtures/smoke_predictions.jsonl --model smoke-baseline --output evaluation/reports/smoke-scorecard.json
+      - run: python -m scripts.modelops promotion-check --scorecard evaluation/reports/smoke-scorecard.json
+      - run: pytest tests/test_model_finetuning_platform.py tests/test_envoy_ai_gateway_integration.py -q

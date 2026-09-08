@@ -1,0 +1,6 @@
+# Separate from server/requirements.txt so the ARIA API image remains slim.
+torch==2.5.1
+transformers==4.46.3
+peft==0.13.2
+accelerate==1.1.1
+mlflow==2.18.0

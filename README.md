@@ -42,6 +42,28 @@ The featured end-to-end demo uses a fictional Canadian bank—MapleTrust Bank—
 
 It is designed for SRE, DevOps, Platform Engineering, AIOps, DevSecOps, and LLMOps interviews.
 
+## Envoy AI Gateway integration
+
+ARIA supports Envoy AI Gateway as the preferred production LLM access layer. The application sends OpenAI-compatible requests to a logical model such as `aria-reasoning`; credentials, provider translation, routing, fallback, and token controls remain at the gateway. Direct Ollama remains available for explicit local/offline development. Existing safety boundaries are unchanged: model output recommends only, while ReBAC, policy, approval, deterministic execution, and recovery validation govern mutations. See [`docs/ENVOY_AI_GATEWAY_INTEGRATION.md`](docs/ENVOY_AI_GATEWAY_INTEGRATION.md).
+
+## Open-model fine-tuning and ModelOps
+
+ARIA includes a runnable model-engineering vertical slice: reviewed dataset validation, secret redaction, deduplication, deterministic splitting, content-addressed manifests, SFT/LoRA/QLoRA entry points, model scorecards, promotion policy, an immutable local registry, vLLM deployment assets, and an Envoy route for the logical `aria-private` model.
+
+```bash
+make dataset-build
+make dataset-validate
+make train-lora-plan
+make eval-model-smoke
+make modelops-test
+```
+
+See [`docs/MODEL_FINETUNING_PLATFORM.md`](docs/MODEL_FINETUNING_PLATFORM.md) before running hardware-intensive training. Training dependencies remain separate from the API image.
+
+## Enterprise AI control-plane evidence
+
+ARIA includes a privacy-preserving AI transaction evidence contract and a tamper-evident local ledger. It links workload identity, policy version and decision, guardrail outcomes, physical and logical models, dataset lineage, evaluation, and latency into a cryptographically chained audit record. See [`docs/ENTERPRISE_AI_CONTROL_PLANE.md`](docs/ENTERPRISE_AI_CONTROL_PLANE.md).
+
 ## On-call SRE copilot
 
 ARIA can receive Alertmanager and signed PagerDuty events, collaborate through Slack, Teams, or Mattermost, expose read-only investigation tools to MCP clients, correlate SDLC events with incidents, and preserve cross-surface identity and audit records. Production mutations remain behind ReBAC, policy, four-eyes approval, deterministic workers, and recovery validation.

@@ -1,0 +1,4 @@
+{"expected_terms":["feature drift","approval"],"id":"banking-eval-001","prompt":"A financial risk model changes its positive prediction rate immediately after a feature release. Give two safe next steps.","sources":["model-monitoring-runbook"]}
+{"expected_terms":["GPU","input pipeline"],"id":"media-eval-001","prompt":"A 3D training job has low GPU utilization and workers wait on object storage. Identify the likely bottleneck.","sources":["multimodal-training-runbook"]}
+{"expected_terms":["Kafka","checkpoint"],"id":"streaming-eval-001","prompt":"Kafka lag grows after a streaming schema release. What evidence and safety constraint matter?","sources":["streaming-recovery-runbook"]}
+{"expected_terms":["insufficient evidence"],"id":"uncertainty-eval-001","insufficient_evidence":true,"prompt":"The service is slow. State the exact root cause using only this information.","sources":[]}

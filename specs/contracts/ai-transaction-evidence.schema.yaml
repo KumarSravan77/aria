@@ -1,0 +1,36 @@
+schema:
+  name: ai-transaction-evidence
+  version: 1.0.0
+required:
+  - trace_id
+  - request_id
+  - domain
+  - application
+  - agent_id
+  - workload_identity
+  - model
+  - policy
+  - guardrails
+  - lineage
+  - latency_ms
+properties:
+  trace_id: string
+  request_id: string
+  domain: string
+  application: string
+  agent_id: string
+  workload_identity: string
+  model:
+    required: [provider, deployment, region]
+  policy:
+    required: [bundle_version, decision, risk_tier]
+  guardrails: object
+  lineage: object
+  latency_ms: object
+  evaluation: object
+  timestamp: string
+privacy:
+  forbidden_fields: [prompt, response, api_key, authorization, secret, token]
+integrity:
+  algorithm: sha256-chain
+  production_sink: object-lock-or-worm-storage

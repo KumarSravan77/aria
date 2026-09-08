@@ -1,0 +1,28 @@
+# ARIA sends the logical model name `aria-reasoning`. The gateway owns the
+# mapping to a physical provider/model. Extend this route with additional
+# backendRefs for weighted routing/fallback as providers are onboarded.
+apiVersion: aigateway.envoyproxy.io/v1beta1
+kind: AIGatewayRoute
+metadata:
+  name: aria-llm
+  namespace: ai-gateway
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: aria-ai-gateway
+  schema:
+    name: OpenAI
+  rules:
+    - matches:
+        - headers:
+            - type: Exact
+              name: x-ai-eg-model
+              value: aria-reasoning
+      backendRefs:
+        - name: openai
+          # Demo physical model. Change here without changing ARIA application code.
+          modelNameOverride: gpt-4o-mini
+  llmRequestCosts:
+    - metadataKey: llm_total_token
+      type: TotalToken

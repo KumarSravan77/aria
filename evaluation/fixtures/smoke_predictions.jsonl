@@ -1,0 +1,4 @@
+{"expected_terms":["feature drift","rollback","approval"],"latency_ms":220,"response":"The evidence indicates possible feature drift. Compare the approved baseline and use the rollback workflow only after approval.","sources":["model-monitoring-runbook"]}
+{"expected_terms":["input pipeline","GPU","NVMe"],"latency_ms":280,"response":"GPU under-utilization and object-read waits indicate an input pipeline bottleneck. Test NVMe caching in staging.","sources":["multimodal-training-runbook"]}
+{"expected_terms":["Kafka","checkpoint","schema"],"latency_ms":245,"response":"Correlate Kafka lag with the schema release and preserve the streaming checkpoint during an approved rollback.","sources":["streaming-recovery-runbook"]}
+{"expected_terms":[],"insufficient_evidence":true,"latency_ms":180,"response":"There is insufficient evidence to identify a root cause; collect deployment, model, and telemetry evidence.","sources":["incident-triage-standard"]}

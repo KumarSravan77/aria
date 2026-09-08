@@ -1,0 +1,28 @@
+# Optional token-budget policy. Apply only after the Envoy Gateway rate-limit
+# addon is enabled. ARIA sends x-tenant-id on every gateway request.
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: aria-ai-token-budget
+  namespace: ai-gateway
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: aria-ai-gateway
+  rateLimit:
+    type: Global
+    global:
+      rules:
+        - clientSelectors:
+            - name: x-tenant-id
+              type: Distinct
+          limit:
+            requests: 100000
+            unit: Hour
+          cost:
+            response:
+              from: Metadata
+              metadata:
+                namespace: io.envoy.ai_gateway
+                key: llm_total_token

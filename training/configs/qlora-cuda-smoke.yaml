@@ -1,0 +1,37 @@
+experiment:
+  name: aria-qwen-qlora-cuda-smoke
+  seed: 42
+model:
+  id: Qwen/Qwen2.5-0.5B-Instruct
+  revision: main
+  cache_dir: artifacts/cache/huggingface
+method:
+  type: qlora
+adapter:
+  rank: 16
+  alpha: 32
+  dropout: 0.05
+  target_modules: [q_proj, k_proj, v_proj, o_proj]
+precision:
+  compute: bf16
+  base_quantization: nf4
+sequence:
+  max_length: 1024
+optimizer:
+  learning_rate: 0.0002
+  weight_decay: 0.01
+  warmup_ratio: 0.05
+batch:
+  per_device: 1
+  gradient_accumulation: 8
+runtime:
+  epochs: 1
+  gradient_checkpointing: true
+dataset:
+  train: datasets/finetuning/processed/train.jsonl
+  validation: datasets/finetuning/processed/validation.jsonl
+  manifest: datasets/finetuning/processed/manifest.json
+evaluation:
+  benchmark_version: aria-eval-v1
+output:
+  directory: artifacts/aria-qwen-qlora-cuda-smoke

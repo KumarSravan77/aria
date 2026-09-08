@@ -1,0 +1,24 @@
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: Backend
+metadata:
+  name: aria-vllm
+  namespace: ai-gateway
+spec:
+  endpoints:
+    - fqdn:
+        hostname: vllm.ai-inference.svc.cluster.local
+        port: 8000
+---
+apiVersion: aigateway.envoyproxy.io/v1beta1
+kind: AIServiceBackend
+metadata:
+  name: aria-vllm
+  namespace: ai-gateway
+spec:
+  schema:
+    name: OpenAI
+    prefix: /v1
+  backendRef:
+    group: gateway.envoyproxy.io
+    kind: Backend
+    name: aria-vllm
