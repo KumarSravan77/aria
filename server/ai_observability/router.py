@@ -10,6 +10,7 @@ except Exception:
 
 from server.ai_observability.langfuse_client import LangfuseClient
 from server.ai_observability.evaluation_runner import EvaluationRunner
+from server.ai_observability.feedback_loop import FeedbackStore
 
 router = APIRouter(prefix="/ai-observability", tags=["ai-observability"])
 
@@ -19,6 +20,17 @@ class TraceRequest(BaseModel):
     prompt: str = "Investigate high latency"
     answer: str = "Rollback deployment after latency regression"
     sources: list[dict] = []
+
+class FeedbackRequest(BaseModel):
+    trace_id: str
+    answer_id: str
+    rating: int
+    category: str
+    session_id: str | None = None
+    expected_source: str | None = None
+    comment: str | None = None
+
+feedback_store = FeedbackStore()
 
 @router.post("/trace")
 def trace_ai(req: TraceRequest, _user=Depends(require_auth)):
@@ -40,3 +52,11 @@ def evaluate(req: TraceRequest, _user=Depends(require_auth)):
         "grounding": runner.groundedness(req.answer, req.sources),
         "safety": runner.remediation_safety(req.answer),
     }
+
+@router.post("/feedback")
+def submit_feedback(req: FeedbackRequest, _user=Depends(require_auth)):
+    return feedback_store.submit(req.model_dump())
+
+@router.get("/feedback/summary")
+def feedback_summary(_user=Depends(require_auth)):
+    return feedback_store.summary()

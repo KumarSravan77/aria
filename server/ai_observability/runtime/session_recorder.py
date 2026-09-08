@@ -14,13 +14,17 @@ from server.ai_observability.runtime.event_schema import RuntimeEvent
 class AiRuntimeSessionRecorder:
     log_path: Path = Path("logs/ai_runtime_debug.jsonl")
     sessions: dict[str, list[dict[str, Any]]] = field(default_factory=dict)
+    trace_ids: dict[str, str] = field(default_factory=dict)
 
     def start_session(self, incident_id: str | None = None, metadata: dict[str, Any] | None = None) -> dict[str, Any]:
         session_id = str(uuid.uuid4())
-        self.record(session_id, "session_started", incident_id=incident_id, metadata=metadata or {})
-        return {"session_id": session_id, "incident_id": incident_id}
+        trace_id = uuid.uuid4().hex
+        self.trace_ids[session_id] = trace_id
+        self.record(session_id, "session_started", trace_id=trace_id, incident_id=incident_id, metadata=metadata or {})
+        return {"session_id": session_id, "trace_id": trace_id, "incident_id": incident_id}
 
     def record(self, session_id: str, event_type: str, **kwargs: Any) -> dict[str, Any]:
+        kwargs.setdefault("trace_id", self.trace_ids.get(session_id))
         event = RuntimeEvent(session_id=session_id, event_type=event_type, **kwargs).as_dict()
         self.sessions.setdefault(session_id, []).append(event)
         self.log_path.parent.mkdir(parents=True, exist_ok=True)
@@ -55,6 +59,7 @@ class AiRuntimeSessionRecorder:
             duration = max(timestamps) - min(timestamps)
         return {
             "session_id": session_id,
+            "trace_id": next((e.get("trace_id") for e in events if e.get("trace_id")), None),
             "event_count": len(events),
             "error_count": len(errors),
             "input_tokens": tokens_in,

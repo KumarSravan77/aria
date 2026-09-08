@@ -64,6 +64,14 @@ See [`docs/MODEL_FINETUNING_PLATFORM.md`](docs/MODEL_FINETUNING_PLATFORM.md) bef
 
 ARIA includes a privacy-preserving AI transaction evidence contract and a tamper-evident local ledger. It links workload identity, policy version and decision, guardrail outcomes, physical and logical models, dataset lineage, evaluation, and latency into a cryptographically chained audit record. See [`docs/ENTERPRISE_AI_CONTROL_PLANE.md`](docs/ENTERPRISE_AI_CONTROL_PLANE.md).
 
+## Agent observability and deep feedback
+
+ARIA correlates agent, tool, retrieval, model, policy, and evaluation activity through OpenTelemetry-compatible trace identities and governed runtime events. Trace-linked feedback is stored without raw prompts or documents, aggregated into failure and knowledge-gap signals, and requires human review before it becomes an evaluation candidate. Feedback never directly retrains or promotes a model. See [`docs/AI_AGENT_OBSERVABILITY_AND_FEEDBACK.md`](docs/AI_AGENT_OBSERVABILITY_AND_FEEDBACK.md).
+
+## License
+
+ARIA is available under the [MIT License](LICENSE).
+
 ## On-call SRE copilot
 
 ARIA can receive Alertmanager and signed PagerDuty events, collaborate through Slack, Teams, or Mattermost, expose read-only investigation tools to MCP clients, correlate SDLC events with incidents, and preserve cross-surface identity and audit records. Production mutations remain behind ReBAC, policy, four-eyes approval, deterministic workers, and recovery validation.

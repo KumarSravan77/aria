@@ -10,6 +10,11 @@ import uuid
 class RuntimeEvent:
     session_id: str
     event_type: str
+    trace_id: str | None = None
+    span_id: str = field(default_factory=lambda: uuid.uuid4().hex[:16])
+    parent_span_id: str | None = None
+    workflow_id: str | None = None
+    agent_id: str | None = None
     incident_id: str | None = None
     node: str | None = None
     tool: str | None = None
@@ -18,6 +23,10 @@ class RuntimeEvent:
     input_tokens: int = 0
     output_tokens: int = 0
     cached_tokens: int = 0
+    model: str | None = None
+    model_version: str | None = None
+    prompt_version: str | None = None
+    evaluation: dict[str, float] = field(default_factory=dict)
     metadata: dict[str, Any] = field(default_factory=dict)
     timestamp: float = field(default_factory=time.time)
     event_id: str = field(default_factory=lambda: str(uuid.uuid4()))
