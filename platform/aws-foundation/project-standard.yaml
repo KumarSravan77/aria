@@ -1,0 +1,34 @@
+schema_version: 1
+defaults:
+  authentication: github-oidc
+  static_aws_keys_allowed: false
+  protected_environment_required: true
+  exact_repository_subject_required: true
+  separate_role_per_environment: true
+  maximum_session_seconds: 3600
+  forbidden_managed_policies: [AdministratorAccess, PowerUserAccess]
+  cost_controls:
+    monthly_budget_required: true
+    forecast_alert_percent: 80
+    actual_alert_percent: 100
+    anomaly_detection_required: true
+    cost_allocation_tags: [Project, Environment, Owner, CostCenter, ManagedBy]
+projects:
+  - repository: KumarSravan77/aria
+    environment: production
+    cloud: aws-optional
+    owner: platform-engineering
+    cost_center: portfolio-lab
+    monthly_budget_usd: 50
+  - repository: KumarSravan77/canadian-retail-mlops-platform
+    environment: production
+    cloud: aws
+    owner: ml-platform
+    cost_center: portfolio-lab
+    monthly_budget_usd: 75
+  - repository: KumarSravan77/fire-drill-chaos-engineering
+    environment: production
+    cloud: aws
+    owner: sre-platform
+    cost_center: portfolio-lab
+    monthly_budget_usd: 50

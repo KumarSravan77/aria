@@ -1,0 +1,14 @@
+project_name                  = "aria"
+environment                   = "production"
+github_owner                  = "KumarSravan77"
+github_repository             = "aria"
+github_oidc_provider_arn      = "arn:aws:iam::123456789012:oidc-provider/token.actions.githubusercontent.com"
+owner                         = "platform-engineering"
+cost_center                   = "portfolio-lab"
+monthly_budget_usd            = 50
+anomaly_threshold_usd         = 10
+create_account_anomaly_monitor = true
+alert_email_addresses         = ["replace-with-verified-operator@example.com"]
+
+# Attach only custom policies scoped to this project's resource ARNs.
+permission_policy_arns = ["arn:aws:iam::123456789012:policy/aria-production-deploy"]

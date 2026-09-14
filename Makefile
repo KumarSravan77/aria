@@ -17,6 +17,10 @@ bootstrap-env: ## Generate local .env secrets if missing
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "%-28s %s\\n", $$1, $$2}'
 
+aws-foundation-validate: ## Validate reusable AWS OIDC and FinOps controls
+	python3 -m pytest tests/test_aws_project_foundation.py -q
+	@if command -v terraform >/dev/null 2>&1; then terraform -chdir=platform/aws-foundation/terraform fmt -check; else echo "terraform not installed; skipped fmt check"; fi
+
 telemetry-render: ## Render and validate the local telemetry overlay
 	kubectl kustomize telemetry/overlays/local >/dev/null
 

@@ -1,0 +1,18 @@
+name: Verify AWS deployment identity
+
+on:
+  workflow_dispatch:
+
+jobs:
+  aws-identity:
+    uses: KumarSravan77/aria/.github/workflows/reusable-aws-oidc.yml@main
+    with:
+      aws-region: ca-central-1
+      environment: production
+      role-session-name: project-deploy
+    secrets:
+      aws-role-arn: ${{ secrets.AWS_ROLE_ARN }}
+      aws-account-id: ${{ secrets.AWS_ACCOUNT_ID }}
+
+# A project-owned deployment workflow must authenticate and deploy in the same
+# job because GitHub credentials do not cross job boundaries.

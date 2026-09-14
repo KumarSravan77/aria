@@ -1,0 +1,43 @@
+name: Reusable AWS OIDC identity check
+
+on:
+  workflow_call:
+    inputs:
+      aws-region:
+        required: true
+        type: string
+      environment:
+        required: true
+        type: string
+      role-session-name:
+        required: false
+        default: github-actions
+        type: string
+    secrets:
+      aws-role-arn:
+        required: true
+      aws-account-id:
+        required: true
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  identity:
+    name: Verify short-lived AWS identity
+    environment: ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure short-lived AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6.2.4
+        with:
+          role-to-assume: ${{ secrets.aws-role-arn }}
+          aws-region: ${{ inputs.aws-region }}
+          role-session-name: ${{ inputs.role-session-name }}-${{ github.run_id }}
+          allowed-account-ids: ${{ secrets.aws-account-id }}
+          mask-aws-account-id: true
+          unset-current-credentials: true
+          translate-env-variables: false
+      - name: Verify assumed role
+        run: aws sts get-caller-identity --query Arn --output text

@@ -20,6 +20,7 @@ This folder contains the optional/enterprise Kubernetes tooling layer for ARIA. 
 | Scanning | Trivy + Kubescape | image/IaC scanning and cluster posture |
 | TLS automation | cert-manager | certificates and issuers |
 | Cluster lifecycle | Cluster API, kOps, Rancher | cluster provisioning and multi-cluster management |
+| AWS project foundation | GitHub OIDC, IAM, Budgets, Cost Anomaly Detection | keyless deployment identity and cost governance |
 
 ## Safety principle
 
@@ -30,3 +31,7 @@ ReBAC → policy validation → approval → audit → async executor
 ```
 
 Do not let an LLM directly run `kubectl`, Argo CD sync, or policy changes.
+
+## AWS projects
+
+Use [`aws-foundation/`](aws-foundation/) for every existing or new project that deploys to AWS. It creates an environment-scoped GitHub Actions role, budget and anomaly controls; the reusable workflow verifies the short-lived identity before project-specific deployment logic runs.
