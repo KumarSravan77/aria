@@ -29,6 +29,7 @@ def generate(
     adapter_path: str | None,
     cache_dir: str,
     max_new_tokens: int,
+    benchmark_name: str,
 ) -> None:
     cache_dir = _configure_cache(cache_dir)
     import torch
@@ -65,7 +66,7 @@ def generate(
             )
         latency_ms = (time.perf_counter() - started) * 1000
         response = tokenizer.decode(output[0][inputs["input_ids"].shape[1] :], skip_special_tokens=True)
-        records.append({**item, "response": response, "latency_ms": round(latency_ms, 3)})
+        records.append({**item, "benchmark": benchmark_name, "response": response, "latency_ms": round(latency_ms, 3)})
     target = Path(output_path)
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text("".join(json.dumps(item, sort_keys=True) + "\n" for item in records))
@@ -80,8 +81,9 @@ def main() -> None:
     parser.add_argument("--adapter")
     parser.add_argument("--cache-dir", default="artifacts/cache/huggingface")
     parser.add_argument("--max-new-tokens", type=int, default=96)
+    parser.add_argument("--benchmark-name", default="aria-eval-v1")
     args = parser.parse_args()
-    generate(args.benchmark, args.output, model_id=args.model, revision=args.revision, adapter_path=args.adapter, cache_dir=args.cache_dir, max_new_tokens=args.max_new_tokens)
+    generate(args.benchmark, args.output, model_id=args.model, revision=args.revision, adapter_path=args.adapter, cache_dir=args.cache_dir, max_new_tokens=args.max_new_tokens, benchmark_name=args.benchmark_name)
 
 
 if __name__ == "__main__":

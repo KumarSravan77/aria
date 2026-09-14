@@ -147,10 +147,11 @@ def train(config: dict[str, Any]) -> dict[str, Any]:
         data_collator=DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False),
     )
     result = trainer.train()
+    validation_metrics = trainer.evaluate()
     trainer.save_model(output)
     tokenizer.save_pretrained(output)
     Path(output, "training-plan.json").write_text(json.dumps(plan, indent=2, sort_keys=True) + "\n")
-    response = {**plan, "train_metrics": result.metrics}
+    response = {**plan, "train_metrics": result.metrics, "validation_metrics": validation_metrics}
     tracking = config.get("tracking", {})
     if tracking.get("enabled", False):
         try:
@@ -171,6 +172,7 @@ def train(config: dict[str, Any]) -> dict[str, Any]:
                 "seed": seed,
             })
             mlflow.log_metrics({key: float(value) for key, value in result.metrics.items() if isinstance(value, (int, float))})
+            mlflow.log_metrics({f"final_{key}": float(value) for key, value in validation_metrics.items() if isinstance(value, (int, float))})
             mlflow.log_artifacts(output, artifact_path="model")
             response["mlflow_run_id"] = run.info.run_id
     return response

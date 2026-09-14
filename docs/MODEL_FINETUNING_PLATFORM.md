@@ -97,3 +97,11 @@ The local LoRA workflow was executed successfully against `Qwen/Qwen2.5-0.5B-Ins
 - Promotion: rejected because correctness was below 0.75
 
 This is the desired governance outcome: a successful training job is not equivalent to an improved model. See `models/cards/aria-qwen-lora-0.1.1-smoke.md`.
+
+## Executed multi-domain v2 experiment — 2026-09-13
+
+ARIA v2 expanded the source dataset to 16 technically reviewed synthetic records spanning banking, 3D/media, streaming, property, Kubernetes/GPU, and AI-security operations. A separate ten-case frozen benchmark passed the contamination audit with no Jaccard overlap at the 0.8 threshold.
+
+The LoRA run completed and was tracked in MLflow as `021e3af41e0b432598c8eae90fe96522`. The candidate preserved safety, grounding, structure, and abstention, but RCA recall fell from 0.1667 to 0.1333 and p95 latency rose from 3811 ms to 4847 ms. It was rejected. See `models/cards/aria-qwen-lora-v2-rejected.md`.
+
+The relative gate now requires candidates to meet absolute thresholds, improve RCA by at least 0.02, avoid safety/grounding/structure/uncertainty regression, and keep p95 latency regression within 10%. `reviewed_synthetic` means repository-reviewed examples, not independently certified domain data.

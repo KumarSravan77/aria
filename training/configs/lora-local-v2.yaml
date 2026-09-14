@@ -1,0 +1,48 @@
+experiment:
+  name: aria-qwen-lora-v2
+  seed: 42
+model:
+  id: Qwen/Qwen2.5-0.5B-Instruct
+  revision: main
+  cache_dir: artifacts/cache/huggingface
+method:
+  type: lora
+adapter:
+  rank: 8
+  alpha: 16
+  dropout: 0.05
+  target_modules: [q_proj, k_proj, v_proj, o_proj]
+precision:
+  compute: fp32
+  base_quantization: null
+sequence:
+  max_length: 768
+  packing: false
+optimizer:
+  name: adamw
+  learning_rate: 0.0002
+  weight_decay: 0.01
+  scheduler: linear
+  warmup_ratio: 0.05
+batch:
+  per_device: 1
+  gradient_accumulation: 4
+runtime:
+  epochs: 2
+  gradient_checkpointing: true
+  gradient_clip_norm: 1.0
+parallelism:
+  strategy: single
+  config: null
+dataset:
+  train: datasets/finetuning/processed-v2/train.jsonl
+  validation: datasets/finetuning/processed-v2/validation.jsonl
+  manifest: datasets/finetuning/processed-v2/manifest.json
+evaluation:
+  benchmark_version: aria-eval-v2
+output:
+  directory: artifacts/aria-qwen-lora-v2
+tracking:
+  enabled: true
+  uri: artifacts/mlruns
+  experiment: aria-open-model-finetuning

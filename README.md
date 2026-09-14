@@ -66,6 +66,8 @@ make eval-model-smoke
 make modelops-test
 ```
 
+The executed v2 experiment adds an audited 16-record multi-domain dataset, a separate ten-case frozen benchmark, MLflow tracking, and relative base-versus-candidate promotion gates. The candidate was correctly rejected after RCA recall regressed and p95 latency increased; see [`models/cards/aria-qwen-lora-v2-rejected.md`](models/cards/aria-qwen-lora-v2-rejected.md). Reproduce the lifecycle with `make dataset-v2-build`, `make train-lora-v2`, and `make eval-model-v2`.
+
 See [`docs/MODEL_FINETUNING_PLATFORM.md`](docs/MODEL_FINETUNING_PLATFORM.md) before running hardware-intensive training. Training dependencies remain separate from the API image.
 
 ## Enterprise AI control-plane evidence

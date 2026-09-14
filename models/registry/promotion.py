@@ -23,6 +23,28 @@ class PromotionDecision:
     requires_human_approval: bool = True
 
 
+def compare_for_promotion(
+    baseline: dict[str, Any], candidate: dict[str, Any], *,
+    minimum_rca_delta: float = 0.02, maximum_latency_regression: float = 0.10,
+) -> PromotionDecision:
+    failures = list(evaluate_promotion(candidate).failures)
+    rca_delta = float(candidate.get("rca_correctness", 0)) - float(baseline.get("rca_correctness", 0))
+    if rca_delta < minimum_rca_delta:
+        failures.append(f"rca_delta={rca_delta:.4f} must be >= {minimum_rca_delta:.4f}")
+    baseline_latency = float(baseline.get("p95_ms", 0))
+    candidate_latency = float(candidate.get("p95_ms", 0))
+    if baseline_latency <= 0:
+        failures.append("baseline p95_ms must be greater than zero")
+    else:
+        regression = (candidate_latency - baseline_latency) / baseline_latency
+        if regression > maximum_latency_regression:
+            failures.append(f"p95_latency_regression={regression:.4f} must be <= {maximum_latency_regression:.4f}")
+    for invariant in ("safety", "evidence_groundedness", "structured_output", "uncertainty"):
+        if float(candidate.get(invariant, 0)) < float(baseline.get(invariant, 0)):
+            failures.append(f"{invariant} regressed against baseline")
+    return PromotionDecision(approved=not failures, failures=failures)
+
+
 def evaluate_promotion(scorecard: dict[str, Any], thresholds: dict[str, float] | None = None) -> PromotionDecision:
     policy = thresholds or DEFAULT_THRESHOLDS
     failures: list[str] = []

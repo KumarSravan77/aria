@@ -23,6 +23,7 @@ jobs:
       - run: python -m pip install pytest pyyaml
       - run: python -m scripts.modelops dataset-build --source datasets/finetuning/raw/aria_sft_seed.jsonl --output datasets/finetuning/processed --version ci
       - run: python -m scripts.modelops dataset-validate --manifest datasets/finetuning/processed/manifest.json
+      - run: python -m scripts.modelops dataset-audit --source datasets/finetuning/raw/aria_sft_v2.jsonl --benchmark evaluation/benchmarks/aria_eval_v2.jsonl --output evaluation/reports/ci-dataset-audit.json
       - run: python -m training.sft.train --config training/configs/lora-local-smoke.yaml --dry-run
       - run: python -m scripts.modelops evaluate --predictions evaluation/fixtures/smoke_predictions.jsonl --model smoke-baseline --output evaluation/reports/smoke-scorecard.json
       - run: python -m scripts.modelops promotion-check --scorecard evaluation/reports/smoke-scorecard.json

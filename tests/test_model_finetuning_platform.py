@@ -7,13 +7,14 @@ import pytest
 
 from evaluation.model_scorecard import evaluate_file, evaluate_records
 from models.registry.local_registry import register_model
-from models.registry.promotion import evaluate_promotion
+from models.registry.promotion import compare_for_promotion, evaluate_promotion
 from training.common.data_pipeline import (
     DatasetValidationError,
     build_dataset,
     redact_text,
     validate_built_dataset,
 )
+from training.common.data_quality import audit_dataset, enforce_audit
 from training.sft.train import build_plan, load_config
 
 
@@ -78,6 +79,18 @@ def test_registry_entry_is_immutable(tmp_path: Path):
         register_model(artifact, tmp_path / "registry", name="aria-model", version="1", base_model="Qwen/Qwen2.5-0.5B-Instruct", dataset_manifest=dataset, scorecard=scorecard)
 
 
+def test_relative_promotion_gate_requires_quality_gain_and_latency_control():
+    baseline = {"rca_correctness": 0.80, "evidence_groundedness": 1.0, "structured_output": 1.0,
+                "safety": 1.0, "uncertainty": 1.0, "p95_ms": 1000}
+    improved = {**baseline, "rca_correctness": 0.84, "p95_ms": 1050}
+    assert compare_for_promotion(baseline, improved).approved is True
+    slower_worse = {**baseline, "rca_correctness": 0.79, "p95_ms": 1300}
+    decision = compare_for_promotion(baseline, slower_worse)
+    assert decision.approved is False
+    assert any("rca_delta" in failure for failure in decision.failures)
+    assert any("latency_regression" in failure for failure in decision.failures)
+
+
 def test_training_plan_validates_dataset_manifest(tmp_path: Path):
     processed = tmp_path / "processed"
     build_dataset(ROOT / "datasets/finetuning/raw/aria_sft_seed.jsonl", processed)
@@ -99,3 +112,25 @@ def test_self_hosted_gateway_assets_are_present():
     assert "aria-vllm" in backend
     assert "aria-private" in route
     assert "vllm/vllm-openai:v0.6.4.post1" in compose
+
+
+def test_v2_dataset_is_balanced_audited_and_not_benchmark_contaminated(tmp_path: Path):
+    source = ROOT / "datasets/finetuning/raw/aria_sft_v2.jsonl"
+    benchmark = ROOT / "evaluation/benchmarks/aria_eval_v2.jsonl"
+    report = audit_dataset(source, benchmark)
+    enforce_audit(report)
+    assert report.record_count == 16
+    assert report.benchmark_count == 10
+    assert report.minimum_quality_score >= 0.9
+    assert set(report.task_distribution) >= {"rca", "safety", "monitoring", "tool_selection"}
+    assert report.contamination_pairs == []
+
+    result = build_dataset(source, tmp_path / "processed", version="v2")
+    assert result.manifest.split_counts == {"train": 12, "validation": 2, "test": 2}
+
+
+def test_v2_experiment_evidence_is_rejected_and_revision_resolved():
+    manifest = json.loads((ROOT / "models/manifests/aria-qwen-lora-v2-experiment.json").read_text())
+    assert len(manifest["base_model"]["resolved_revision"]) == 40
+    assert manifest["promotion"]["decision"] == "rejected"
+    assert manifest["benchmark"]["candidate_rca_correctness"] < manifest["benchmark"]["baseline_rca_correctness"]

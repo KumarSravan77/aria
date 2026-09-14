@@ -85,8 +85,8 @@ def deterministic_splits(records: list[dict[str, Any]], seed: int = 42) -> dict[
     ordered = sorted(records, key=lambda item: item["id"])
     random.Random(seed).shuffle(ordered)
     total = len(ordered)
-    test_count = 1 if total >= 3 else 0
-    validation_count = 1 if total >= 2 else 0
+    test_count = max(1, round(total * 0.1)) if total >= 3 else 0
+    validation_count = max(1, round(total * 0.1)) if total >= 2 else 0
     train_count = total - validation_count - test_count
     return {
         "train": ordered[:train_count],

@@ -553,6 +553,24 @@ dataset-build: ## Build immutable, sanitized ARIA SFT dataset splits
 dataset-validate: ## Validate dataset schema and split hashes
 	python3 -m scripts.modelops dataset-validate --manifest datasets/finetuning/processed/manifest.json
 
+dataset-v2-build: ## Build the audited multi-domain SFT v2 dataset
+	python3 -m scripts.modelops dataset-audit --source datasets/finetuning/raw/aria_sft_v2.jsonl --benchmark evaluation/benchmarks/aria_eval_v2.jsonl --output evaluation/reports/v2-dataset-audit.json
+	python3 -m scripts.modelops dataset-build --source datasets/finetuning/raw/aria_sft_v2.jsonl --output datasets/finetuning/processed-v2 --version v2
+	python3 -m scripts.modelops dataset-validate --manifest datasets/finetuning/processed-v2/manifest.json
+
+train-lora-v2-plan: dataset-v2-build ## Display the audited v2 LoRA plan
+	python3 -m training.sft.train --config training/configs/lora-local-v2.yaml --dry-run
+
+train-lora-v2: dataset-v2-build ## Fine-tune the v2 local candidate
+	python3 -m training.sft.train --config training/configs/lora-local-v2.yaml
+
+eval-model-v2: ## Compare the base model and v2 LoRA candidate on the frozen v2 benchmark
+	.venv-modelops/bin/python -m evaluation.generate_predictions --benchmark evaluation/benchmarks/aria_eval_v2.jsonl --benchmark-name aria-eval-v2 --output evaluation/reports/v2-base-predictions.jsonl
+	.venv-modelops/bin/python -m scripts.modelops evaluate --predictions evaluation/reports/v2-base-predictions.jsonl --benchmark aria-eval-v2 --model Qwen2.5-0.5B-base --output evaluation/reports/v2-base-scorecard.json
+	.venv-modelops/bin/python -m evaluation.generate_predictions --benchmark evaluation/benchmarks/aria_eval_v2.jsonl --benchmark-name aria-eval-v2 --adapter artifacts/aria-qwen-lora-v2 --output evaluation/reports/v2-candidate-predictions.jsonl
+	.venv-modelops/bin/python -m scripts.modelops evaluate --predictions evaluation/reports/v2-candidate-predictions.jsonl --benchmark aria-eval-v2 --model aria-qwen-lora-v2 --output evaluation/reports/v2-candidate-scorecard.json
+	.venv-modelops/bin/python -m scripts.modelops promotion-compare --baseline evaluation/reports/v2-base-scorecard.json --candidate evaluation/reports/v2-candidate-scorecard.json --output evaluation/reports/v2-promotion-decision.json
+
 train-lora-plan: dataset-build ## Display the local LoRA plan without downloading a model
 	python3 -m training.sft.train --config training/configs/lora-local-smoke.yaml --dry-run
 

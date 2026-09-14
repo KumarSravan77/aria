@@ -25,6 +25,7 @@ tmp/
 artifacts/
 models/registry/entries/
 datasets/finetuning/processed/
+datasets/finetuning/processed-v2/
 evaluation/reports/
 mlruns/
 

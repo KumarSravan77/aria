@@ -1,0 +1,45 @@
+{
+  "artifact": {
+    "format": "peft-lora-safetensors",
+    "sha256": "367a2875692f9533e69bb40edcb31bb86bb70697935b3e8ad54236ba8ecfbe91",
+    "size_mib": 45
+  },
+  "base_model": {
+    "id": "Qwen/Qwen2.5-0.5B-Instruct",
+    "requested_revision": "main",
+    "resolved_revision": "7ae557604adf67be50417f59c2c2f167def9a775"
+  },
+  "benchmark": {
+    "candidate_p95_ms": 4847.035,
+    "candidate_rca_correctness": 0.13333333333333333,
+    "name": "aria-eval-v2",
+    "sample_count": 10,
+    "baseline_p95_ms": 3811.156,
+    "baseline_rca_correctness": 0.16666666666666666
+  },
+  "dataset": {
+    "name": "aria-sft",
+    "record_count": 16,
+    "sha256": "4ef2af309202a3a20b6c2feb9c62156c8e0fdd3616ec0d37fbd13c35b6541182",
+    "split_counts": {"test": 2, "train": 12, "validation": 2},
+    "version": "v2"
+  },
+  "experiment": "aria-qwen-lora-v2",
+  "mlflow_run_id": "021e3af41e0b432598c8eae90fe96522",
+  "promotion": {
+    "decision": "rejected",
+    "reasons": [
+      "RCA correctness did not meet the 0.75 absolute threshold",
+      "RCA correctness regressed by 0.0333 instead of improving by 0.02",
+      "p95 latency regressed by 27.18%, exceeding the 10% allowance"
+    ]
+  },
+  "training": {
+    "epochs": 2,
+    "final_validation_loss": 5.165759563446045,
+    "method": "lora",
+    "runtime_seconds": 13.2909,
+    "seed": 42,
+    "training_loss": 5.280694325764974
+  }
+}
