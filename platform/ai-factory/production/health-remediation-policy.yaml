@@ -1,0 +1,21 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: ai-factory-gpu-workload-safety
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: require-tenant-and-owner
+      match:
+        any:
+          - resources:
+              namespaces: ["ai-team-*"]
+              kinds: [Pod]
+      validate:
+        message: GPU workloads require tenant and owner labels.
+        pattern:
+          metadata:
+            labels:
+              aria.io/tenant: "?*"
+              aria.io/owner: "?*"

@@ -42,6 +42,10 @@ The featured end-to-end demo uses a fictional Canadian bank—MapleTrust Bank—
 
 It is designed for SRE, DevOps, Platform Engineering, AIOps, DevSecOps, and LLMOps interviews.
 
+## Kubernetes AI Factory
+
+ARIA includes a portfolio-grade AI Factory control plane inspired by the CNCF reference architecture: two isolated tenants, GPU quotas, default-deny networking, Kueue queueing, KServe/vLLM inference, DCGM telemetry, OpenCost attribution, policy enforcement, and approval-gated hardware remediation. A deterministic API chooses whole-GPU, MIG, or time-slicing policy from workload and trust requirements without directly allocating hardware. The local base runs without a GPU; hardware-dependent capabilities are explicitly marked as production overlays. See [`docs/AI_FACTORY_ON_KUBERNETES.md`](docs/AI_FACTORY_ON_KUBERNETES.md) and [`platform/ai-factory/capability-matrix.yaml`](platform/ai-factory/capability-matrix.yaml).
+
 ## Envoy AI Gateway integration
 
 ARIA supports Envoy AI Gateway as the preferred production LLM access layer. The application sends OpenAI-compatible requests to a logical model such as `aria-reasoning`; credentials, provider translation, routing, fallback, and token controls remain at the gateway. Direct Ollama remains available for explicit local/offline development. Existing safety boundaries are unchanged: model output recommends only, while ReBAC, policy, approval, deterministic execution, and recovery validation govern mutations. See [`docs/ENVOY_AI_GATEWAY_INTEGRATION.md`](docs/ENVOY_AI_GATEWAY_INTEGRATION.md).

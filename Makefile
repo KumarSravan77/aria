@@ -583,3 +583,12 @@ vllm-down: ## Stop NVIDIA vLLM serving profile
 ai-gateway-apply-self-hosted: ## Route aria-private to self-hosted vLLM
 	kubectl apply -f k8s/ai-gateway/vllm-backend.yaml
 	kubectl apply -f k8s/ai-gateway/route-self-hosted.yaml
+
+ai-factory-validate: ## Render the local, no-GPU AI Factory tenancy base
+	kubectl kustomize platform/ai-factory/base >/dev/null
+
+ai-factory-test: ## Run AI Factory policy and manifest tests
+	python3 -m pytest tests/test_ai_factory_platform.py -q
+
+ai-factory-plan-demo: ## Show an untrusted tenant placement decision
+	curl -s -X POST -H "Authorization: Bearer $${API_TOKEN:-dev-user-token}" -H "Content-Type: application/json" http://localhost:8080/ai-factory/plan -d '{"tenant":"external-research","workload_type":"inference","trust_level":"untrusted","gpu_count":1}' | jq .

@@ -1,0 +1,15 @@
+reference: https://www.cncf.io/blog/2026/08/27/building-an-ai-factory-on-kubernetes/
+capabilities:
+  hardware_lifecycle: {status: documented, production: "Metal3/Ironic or vendor manager required"}
+  cluster_lifecycle: {status: existing, evidence: "platform/cluster-lifecycle and Argo CD"}
+  node_inventory: {status: production-overlay, production: "NFD and GPU Operator required"}
+  tenant_isolation: {status: implemented, evidence: "namespaces, quotas, default-deny policies"}
+  gpu_allocation: {status: production-overlay, evidence: "Kueue quotas; MIG/DRA depend on hardware"}
+  inference: {status: implemented, evidence: "KServe/vLLM and Envoy AI Gateway manifests"}
+  training: {status: implemented, evidence: "Kubeflow operations plus LoRA/QLoRA pipelines"}
+  networking: {status: partial, evidence: "default-deny policies", production: "Cilium/Multus/RDMA required"}
+  storage: {status: documented, production: "tenant CSI/object store required"}
+  observability: {status: implemented, evidence: "OTel, Prometheus, Grafana, DCGM ServiceMonitor"}
+  identity_policy: {status: implemented, evidence: "OIDC/RBAC/ReBAC/Kyverno patterns"}
+  reliability: {status: partial, evidence: "advisory planner and approval-gated recovery"}
+  chargeback: {status: partial, evidence: "OpenCost plus tenant GPU-second contract"}

@@ -1,0 +1,41 @@
+apiVersion: kueue.x-k8s.io/v1beta1
+kind: ResourceFlavor
+metadata:
+  name: nvidia-gpu
+spec:
+  nodeLabels:
+    accelerator: nvidia-gpu
+---
+apiVersion: kueue.x-k8s.io/v1beta1
+kind: ClusterQueue
+metadata:
+  name: shared-gpu
+spec:
+  namespaceSelector: {}
+  resourceGroups:
+    - coveredResources: ["cpu", "memory", "nvidia.com/gpu"]
+      flavors:
+        - name: nvidia-gpu
+          resources:
+            - name: cpu
+              nominalQuota: "128"
+            - name: memory
+              nominalQuota: 512Gi
+            - name: nvidia.com/gpu
+              nominalQuota: "8"
+---
+apiVersion: kueue.x-k8s.io/v1beta1
+kind: LocalQueue
+metadata:
+  name: team-blue
+  namespace: ai-team-blue
+spec:
+  clusterQueue: shared-gpu
+---
+apiVersion: kueue.x-k8s.io/v1beta1
+kind: LocalQueue
+metadata:
+  name: team-gold
+  namespace: ai-team-gold
+spec:
+  clusterQueue: shared-gpu

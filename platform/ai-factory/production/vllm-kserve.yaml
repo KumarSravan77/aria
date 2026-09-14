@@ -1,0 +1,27 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: qwen-private
+  namespace: ai-team-blue
+  labels:
+    aria.io/tenant: team-blue
+spec:
+  predictor:
+    serviceAccountName: ai-workload
+    containers:
+      - name: vllm
+        image: vllm/vllm-openai:v0.8.5
+        args: ["--model", "Qwen/Qwen2.5-7B-Instruct", "--served-model-name", "qwen-private"]
+        resources:
+          requests:
+            cpu: "4"
+            memory: 16Gi
+            nvidia.com/gpu: "1"
+          limits:
+            cpu: "8"
+            memory: 32Gi
+            nvidia.com/gpu: "1"
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]

@@ -13,6 +13,7 @@ from server.evals.router import router as evals_router
 from server.gitops_ai.router import router as gitops_ai_router
 from server.platform.router import router as self_service_platform_router
 from server.platform.secrets.router import router as secrets_platform_router
+from server.platform.ai_factory.router import router as ai_factory_router
 import json
 from pathlib import Path
 from fastapi import FastAPI, Depends, HTTPException
@@ -903,6 +904,7 @@ app.include_router(kubernetes_troubleshooter_router)
 app.include_router(platform_agents_router)
 app.include_router(self_service_platform_router)
 app.include_router(secrets_platform_router)
+app.include_router(ai_factory_router)
 app.include_router(domain_router)
 app.include_router(k8s_issues_router)
 app.include_router(eval_scorecard_router)
