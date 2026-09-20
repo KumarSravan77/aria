@@ -1,5 +1,7 @@
 from __future__ import annotations
-from datetime import datetime
+import hashlib
+import json
+from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 from server.db.models import Approval, IncidentAction, AuditLog
 from server.utils_time import utc_now
@@ -10,19 +12,40 @@ SUCCEEDED = 'SUCCEEDED'
 FAILED = 'FAILED'
 
 STUCK_RUNNING_THRESHOLD_SECONDS = 600  # 10 minutes
+APPROVAL_TTL_SECONDS = 900
+
+
+def _proposal_payload(action: dict) -> dict:
+    return {
+        'action': action.get('action'),
+        'target': action.get('target', 'unknown'),
+        'namespace': action.get('namespace'),
+        'replicas': action.get('replicas'),
+        'revision': action.get('revision'),
+        'rollback': action.get('rollback') or action.get('rollback_plan'),
+    }
+
+
+def _proposal_digest(proposal: dict) -> str:
+    encoded = json.dumps(proposal, sort_keys=True, separators=(',', ':')).encode()
+    return hashlib.sha256(encoded).hexdigest()
 
 class ApprovalService:
     def __init__(self, db: Session):
         self.db = db
 
     def request_approval(self, incident_id: str, action: dict, requested_by: str = 'ai-teammate') -> dict:
+        proposal = _proposal_payload(action)
+        digest = _proposal_digest(proposal)
+        expires_at = utc_now() + timedelta(seconds=APPROVAL_TTL_SECONDS)
         action_row = IncidentAction(
             incident_id=incident_id,
             action=action.get('action'),
             target=action.get('target', 'unknown'),
             namespace=action.get('namespace'),
             requested_by=requested_by,
-            result={**action, 'execution_status': 'PENDING_APPROVAL'},
+            result={**action, 'proposal': proposal, 'proposal_digest': digest,
+                    'approval_expires_at': expires_at.isoformat(), 'execution_status': 'PENDING_APPROVAL'},
         )
         self.db.add(action_row)
         self.db.flush()
@@ -31,7 +54,8 @@ class ApprovalService:
         self.db.add(AuditLog(actor=requested_by, action='approval.requested', resource_type='incident', resource_id=incident_id, metadata_json=action))
         self.db.commit()
         self.db.refresh(approval)
-        return {'approval_id': approval.id, 'action_id': action_row.id, 'status': approval.status}
+        return {'approval_id': approval.id, 'action_id': action_row.id, 'status': approval.status,
+                'proposal_digest': digest, 'expires_at': expires_at.isoformat()}
 
     def decide(self, approval_id: int, approved: bool, approver: str, reason: str | None = None) -> dict:
         approval = self.db.get(Approval, approval_id)
@@ -44,6 +68,14 @@ class ApprovalService:
             raise ValueError(f'Approval {approval_id} is not linked to an action')
         if approved and action_row and action_row.requested_by == approver:
             raise ValueError('Approver cannot be the same as requester')
+        if approved and action_row:
+            payload = action_row.result or {}
+            expires_at = datetime.fromisoformat(payload['approval_expires_at'])
+            if expires_at <= utc_now():
+                raise ValueError(f'Approval {approval_id} has expired')
+            proposal = payload.get('proposal') or {}
+            if _proposal_digest(proposal) != payload.get('proposal_digest'):
+                raise ValueError('Proposal digest mismatch')
         approval.status = 'APPROVED' if approved else 'REJECTED'
         approval.approver = approver
         approval.reason = reason
@@ -100,7 +132,7 @@ class ApprovalService:
         self.db.commit()
         return {'approval_id': approval.id, 'action_id': action_row.id, 'execution_status': QUEUED}
 
-    def execute_approved_action(self, approval_id: int, executor) -> dict:
+    def execute_approved_action(self, approval_id: int, executor, executor_id: str = 'aria-celery-worker') -> dict:
         approval = self.db.get(Approval, approval_id)
         if not approval:
             raise KeyError(f'Approval not found: {approval_id}')
@@ -122,6 +154,19 @@ class ApprovalService:
         if action_row.executed:
             raise ValueError(f'Action {action_row.id} has already been executed')
         payload = action_row.result or {}
+        if executor_id in {action_row.requested_by, approval.approver}:
+            raise ValueError('Executor must be independent from requester and approver')
+        expires_at = datetime.fromisoformat(payload['approval_expires_at'])
+        if expires_at <= utc_now():
+            raise ValueError(f'Approval {approval_id} has expired')
+        proposal = payload.get('proposal') or {}
+        current = _proposal_payload({
+            'action': action_row.action, 'target': action_row.target, 'namespace': action_row.namespace,
+            'replicas': payload.get('replicas'), 'revision': payload.get('revision'),
+            'rollback': payload.get('rollback') or payload.get('rollback_plan'),
+        })
+        if current != proposal or _proposal_digest(proposal) != payload.get('proposal_digest'):
+            raise ValueError('Approved proposal changed before execution')
         if payload.get('execution_status') == RUNNING:
             raise ValueError(f'Action {action_row.id} is already RUNNING')
         action_row.result = {**payload, 'execution_status': RUNNING, 'execution_started_at': utc_now().isoformat()}

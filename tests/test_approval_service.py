@@ -135,3 +135,43 @@ def test_get_approval_target_returns_deployment_name():
     approval = service.request_approval('INC-1', {'action': 'scale_deployment', 'target': 'checkout-api'}, 'requester')
     target = service.get_approval_target(approval['approval_id'])
     assert target == 'checkout-api'
+
+
+def test_approval_is_bound_to_immutable_proposal():
+    from server.db.models import IncidentAction
+
+    db = make_db()
+    service = ApprovalService(db)
+    approval = service.request_approval(
+        'INC-1', {'action': 'scale_deployment', 'target': 'checkout-api', 'namespace': 'demo',
+                  'replicas': 4, 'rollback': 'scale back to two'}, 'requester')
+    service.decide(approval['approval_id'], approved=True, approver='commander')
+    action = db.get(IncidentAction, approval['action_id'])
+    action.target = 'different-deployment'
+    db.commit()
+    with pytest.raises(ValueError, match='changed before execution'):
+        service.execute_approved_action(approval['approval_id'], FakeExecutor())
+
+
+def test_executor_must_be_third_identity():
+    db = make_db()
+    service = ApprovalService(db)
+    approval = service.request_approval(
+        'INC-1', {'action': 'restart_deployment', 'target': 'checkout-api'}, 'requester')
+    service.decide(approval['approval_id'], approved=True, approver='commander')
+    with pytest.raises(ValueError, match='independent'):
+        service.execute_approved_action(approval['approval_id'], FakeExecutor(), executor_id='commander')
+
+
+def test_expired_approval_is_rejected():
+    from server.db.models import IncidentAction
+
+    db = make_db()
+    service = ApprovalService(db)
+    approval = service.request_approval(
+        'INC-1', {'action': 'restart_deployment', 'target': 'checkout-api'}, 'requester')
+    action = db.get(IncidentAction, approval['action_id'])
+    action.result = {**action.result, 'approval_expires_at': (datetime.now(timezone.utc) - timedelta(seconds=1)).isoformat()}
+    db.commit()
+    with pytest.raises(ValueError, match='expired'):
+        service.decide(approval['approval_id'], approved=True, approver='commander')

@@ -8,6 +8,8 @@ This update closes the safety and authorization gaps identified in the ARIA code
 2. `/investigate` now performs ReBAC service authorization before writing incident records.
 3. `/approvals/{id}/execute` now checks ReBAC authorization against the approval target before dispatching execution.
 4. `execute_approved_action` now locks the `IncidentAction` row with `with_for_update()` before claiming execution, preserving the exactly-once mutation invariant on production databases that support row locks.
+5. Approval records now bind a canonical action payload through SHA-256, expire after 15 minutes, and are revalidated immediately before execution.
+6. Requester, approver, and executor identities must be distinct; the Celery worker uses its service identity rather than a user-supplied actor.
 
 ## High/medium fixes
 
@@ -27,3 +29,4 @@ Added `tests/test_code_review_hardening_regressions.py` for:
 - orphan approval rejection
 - stale RUNNING + executed guard
 - approved action execution path using the guarded executor flow
+- expired approval, action-payload tampering, and executor-separation rejection
