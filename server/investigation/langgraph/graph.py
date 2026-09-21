@@ -42,15 +42,9 @@ class LangGraphInvestigationWorkflow:
             "checkpoints": [],
             "safety_boundary": "Graph nodes recommend only; execution remains behind ReBAC, policy and approvals.",
         }
-        for node_name in route:
-            try:
-                node_fn = getattr(self.nodes, node_name)
-                state = node_fn(state)
-            except Exception as exc:
-                state.setdefault("errors", []).append({"node": node_name, "error": str(exc)})
-            state["checkpoints"].append(self.checkpoints.save(investigation_id, node_name, state))
+        state = self._run_graph(state, route, investigation_id)
         return {
-            "workflow": "langgraph_compatible_investigation",
+            "workflow": "langgraph_investigation" if self._langgraph_available() else "bounded_fallback_investigation",
             "langgraph_installed": self._langgraph_available(),
             "state": state,
             "summary": {
@@ -62,6 +56,40 @@ class LangGraphInvestigationWorkflow:
                 "error_count": len(state.get("errors", [])),
             },
         }
+
+    def _run_graph(self, state: dict[str, Any], route: list[str], investigation_id: str) -> dict[str, Any]:
+        try:
+            from langgraph.graph import END, START, StateGraph
+            from server.investigation.langgraph.state import InvestigationState
+        except ImportError:
+            return self._run_fallback(state, route, investigation_id)
+
+        builder = StateGraph(InvestigationState)
+        previous = START
+        for index, node_name in enumerate(route):
+            graph_name = f"{index:02d}_{node_name}"
+
+            def execute(current, selected=node_name):
+                return self._execute_node(current, selected, investigation_id)
+
+            builder.add_node(graph_name, execute)
+            builder.add_edge(previous, graph_name)
+            previous = graph_name
+        builder.add_edge(previous, END)
+        return dict(builder.compile().invoke(state))
+
+    def _run_fallback(self, state: dict[str, Any], route: list[str], investigation_id: str) -> dict[str, Any]:
+        for node_name in route:
+            state = self._execute_node(state, node_name, investigation_id)
+        return state
+
+    def _execute_node(self, state: dict[str, Any], node_name: str, investigation_id: str) -> dict[str, Any]:
+        try:
+            state = getattr(self.nodes, node_name)(state)
+        except Exception as exc:
+            state.setdefault("errors", []).append({"node": node_name, "error": str(exc)})
+        state.setdefault("checkpoints", []).append(self.checkpoints.save(investigation_id, node_name, state))
+        return state
 
     def _langgraph_available(self) -> bool:
         try:

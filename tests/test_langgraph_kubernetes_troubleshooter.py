@@ -25,4 +25,5 @@ def test_kubernetes_troubleshooter_returns_read_only_evidence():
 def test_langgraph_workflow_invokes_and_checkpoints():
     result = LangGraphInvestigationWorkflow().invoke({"service": "checkout-api", "severity": "P3"})
     assert result["summary"]["evidence_count"] >= 1
+    assert result["workflow"] in {"langgraph_investigation", "bounded_fallback_investigation"}
     assert result["state"]["checkpoints"]
