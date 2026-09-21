@@ -9,6 +9,9 @@ APPROVER_TOKEN ?= $(shell echo "$(API_AUTH_TOKENS)" | cut -d: -f1)
 AUTH_HEADER := Authorization: Bearer $(API_TOKEN)
 APPROVER_AUTH_HEADER := Authorization: Bearer $(APPROVER_TOKEN)
 ENVIRONMENT ?= dev
+PIP_INDEX_URL ?= https://pypi.org/simple
+PIP_TRUSTED_HOST ?=
+PIP_BUILD_ARGS := --build-arg PIP_INDEX_URL=$(PIP_INDEX_URL) --build-arg PIP_TRUSTED_HOST=$(PIP_TRUSTED_HOST)
 
 .PHONY: help bootstrap-env
 bootstrap-env: ## Generate local .env secrets if missing
@@ -84,6 +87,10 @@ kind-delete: ## Delete local Kind cluster
 
 k8s-bootstrap: ## Install namespaces, metrics stack, and base config
 	kubectl apply -f k8s/namespaces.yaml
+	@kubectl -n sre get secret aria-local-runtime >/dev/null 2>&1 || kubectl -n sre create secret generic aria-local-runtime \
+		--from-literal=database-url='postgresql+psycopg2://incident:local-only@postgres:5432/incidentdb' \
+		--from-literal=integration-secret="$$(openssl rand -hex 32)"
+	kubectl apply -f k8s/datastores/core.yaml
 	kubectl apply -f k8s/datastores/chroma.yaml
 	helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 	helm repo add grafana https://grafana.github.io/helm-charts
@@ -91,22 +98,22 @@ k8s-bootstrap: ## Install namespaces, metrics stack, and base config
 	helm upgrade --install kube-prometheus-stack prometheus-community/kube-prometheus-stack -n monitoring -f k8s/monitoring/prometheus-values.yaml --create-namespace
 
 k8s-deploy-app: ## Build and deploy sample app and investigator to Kind
-	docker build -t checkout-api:local apps/sample-checkout-api
+	docker build $(PIP_BUILD_ARGS) -t checkout-api:local apps/sample-checkout-api
 	kind load docker-image checkout-api:local --name $(CLUSTER)
-	docker build -t inventory-api:local apps/inventory-api
+	docker build $(PIP_BUILD_ARGS) -t inventory-api:local apps/inventory-api
 	kind load docker-image inventory-api:local --name $(CLUSTER)
-	docker build -t banking-api:local apps/banking-api
+	docker build $(PIP_BUILD_ARGS) -t banking-api:local apps/banking-api
 	kind load docker-image banking-api:local --name $(CLUSTER)
-	docker build -t fraud-detection-api:local apps/fraud-detection-api
+	docker build $(PIP_BUILD_ARGS) -t fraud-detection-api:local apps/fraud-detection-api
 	kind load docker-image fraud-detection-api:local --name $(CLUSTER)
-	docker build -t transaction-ledger-api:local apps/transaction-ledger-api
+	docker build $(PIP_BUILD_ARGS) -t transaction-ledger-api:local apps/transaction-ledger-api
 	kind load docker-image transaction-ledger-api:local --name $(CLUSTER)
-	docker build -t aria:local -f server/Dockerfile .
-	kind load docker-image aria:local --name $(CLUSTER)
+	docker build $(PIP_BUILD_ARGS) -t incident-investigator-api:local -f server/Dockerfile .
+	kind load docker-image incident-investigator-api:local --name $(CLUSTER)
 	kubectl apply -f k8s/apps/sample-checkout-api.yaml
 	kubectl apply -f k8s/apps/inventory-api.yaml
 	kubectl apply -f k8s/apps/banking-demo.yaml
-	kubectl apply -f k8s/apps/aria-api.yaml
+	kubectl apply -f k8s/apps/incident-investigator-api.yaml
 	kubectl apply -f k8s/monitoring/grafana-application-dashboard.yaml
 
 port-forward: ## Port-forward ARIA, banking API, Grafana, and Prometheus

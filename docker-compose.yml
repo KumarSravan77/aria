@@ -35,7 +35,9 @@ services:
     profiles: ["collab"]
 
   checkout-api:
-    build: ./apps/sample-checkout-api
+    build:
+      context: ./apps/sample-checkout-api
+      args: {PIP_INDEX_URL: "${PIP_INDEX_URL:-https://pypi.org/simple}", PIP_TRUSTED_HOST: "${PIP_TRUSTED_HOST:-}"}
     environment:
       CHAOS_LATENCY_MS: "0"
       CHAOS_ERROR_RATE: "0"
@@ -48,6 +50,7 @@ services:
     build:
       context: .
       dockerfile: server/Dockerfile
+      args: {PIP_INDEX_URL: "${PIP_INDEX_URL:-https://pypi.org/simple}", PIP_TRUSTED_HOST: "${PIP_TRUSTED_HOST:-}", INSTALL_LOCAL_EMBEDDINGS: "${INSTALL_LOCAL_EMBEDDINGS:-false}"}
     environment:
       CHROMA_HOST: chroma
       CHROMA_PORT: "8000"
@@ -75,6 +78,7 @@ services:
     build:
       context: .
       dockerfile: server/Dockerfile
+      args: {PIP_INDEX_URL: "${PIP_INDEX_URL:-https://pypi.org/simple}", PIP_TRUSTED_HOST: "${PIP_TRUSTED_HOST:-}", INSTALL_LOCAL_EMBEDDINGS: "${INSTALL_LOCAL_EMBEDDINGS:-false}"}
     command: celery -A server.workers.celery_app.celery_app worker --loglevel=INFO
     environment:
       DATABASE_URL: postgresql+psycopg2://incident:incident@postgres:5432/incidentdb

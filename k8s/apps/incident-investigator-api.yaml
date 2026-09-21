@@ -58,6 +58,43 @@ spec:
               value: "8000"
             - name: SELF_HEALING_ENABLED
               value: "true"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: aria-local-runtime
+                  key: database-url
+            - name: REDIS_URL
+              value: redis://redis:6379/0
+            - name: ARIA_INTEGRATION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: aria-local-runtime
+                  key: integration-secret
+            - name: OPENMODELOPS_FACTORY_URL
+              value: http://factory-api.openmodelops.svc.cluster.local:8000
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
 ---
 apiVersion: v1
 kind: Service
