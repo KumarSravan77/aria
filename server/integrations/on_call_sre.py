@@ -47,6 +47,8 @@ class IntelligencePublishRequest(BaseModel):
     evidence: list[SignalEvidence] = Field(min_length=1)
     hypotheses: list[SignalHypothesis] = Field(default_factory=list)
     recommended_actions: list[str] = Field(default_factory=list)
+    tenant: str | None = Field(default=None, min_length=1, max_length=128)
+    workload_id: str | None = Field(default=None, min_length=1, max_length=128)
 
 
 def _signature(secret: str, timestamp: str, nonce: str, body: bytes) -> str:
