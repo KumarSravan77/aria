@@ -51,3 +51,25 @@ class KubernetesActions:
             return {"status": "ok", "action": "restart_deployment", "namespace": namespace, "deployment": deployment, "restarted_at": now, "mode": self.mode}
         except ApiException as e:
             return {"status": "failed", "reason": e.reason, "body": e.body}
+
+    def deployment_state(self, namespace: str, deployment: str) -> dict:
+        if self.mode == "unconfigured":
+            return {"available": False, "healthy": False, "reason": "Kubernetes client is not configured"}
+        try:
+            item = self.apps.read_namespaced_deployment(deployment, namespace)
+            desired = item.spec.replicas or 0
+            ready = item.status.ready_replicas or 0
+            unavailable = item.status.unavailable_replicas or 0
+            return {
+                "available": True,
+                "healthy": ready >= desired and unavailable == 0,
+                "namespace": namespace,
+                "deployment": deployment,
+                "uid": item.metadata.uid,
+                "resource_version": item.metadata.resource_version,
+                "desired_replicas": desired,
+                "ready_replicas": ready,
+                "unavailable_replicas": unavailable,
+            }
+        except ApiException as e:
+            return {"available": False, "healthy": False, "reason": e.reason}

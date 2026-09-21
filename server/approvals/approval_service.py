@@ -179,6 +179,7 @@ class ApprovalService:
                 action_row.target,
                 replicas=payload.get('replicas'),
                 revision=payload.get('revision'),
+                rollback=proposal.get('rollback'),
             )
         except Exception as exc:
             failure = {'error': str(exc), 'execution_status': FAILED}
@@ -186,8 +187,13 @@ class ApprovalService:
             self.db.add(AuditLog(actor=approval.approver or 'system', action='healing.execution_failed', resource_type='incident_action', resource_id=str(action_row.id), metadata_json=failure))
             self.db.commit()
             return {'approval_id': approval.id, 'action_id': action_row.id, 'executed': False, 'execution_status': FAILED, 'error': str(exc)}
-        action_row.executed = True
-        action_row.result = {**(action_row.result or {}), 'execution_result': result, 'execution_status': SUCCEEDED}
-        self.db.add(AuditLog(actor=approval.approver or 'system', action='healing.executed_after_approval', resource_type='incident_action', resource_id=str(action_row.id), metadata_json=result))
+        successful = result.get('status') == 'ok' and result.get('verification', {}).get('healthy', True)
+        rolled_back = result.get('status') == 'rolled_back'
+        action_row.executed = successful or rolled_back
+        final_status = SUCCEEDED if successful else 'ROLLED_BACK' if rolled_back else FAILED
+        action_row.result = {**(action_row.result or {}), 'execution_result': result, 'execution_status': final_status}
+        audit_action = 'healing.executed_after_approval' if successful else 'healing.rolled_back' if rolled_back else 'healing.verification_failed'
+        self.db.add(AuditLog(actor=approval.approver or 'system', action=audit_action, resource_type='incident_action', resource_id=str(action_row.id), metadata_json=result))
         self.db.commit()
-        return {'approval_id': approval.id, 'action_id': action_row.id, 'executed': True, 'execution_status': SUCCEEDED, 'result': result}
+        return {'approval_id': approval.id, 'action_id': action_row.id, 'executed': action_row.executed,
+                'execution_status': final_status, 'result': result}
