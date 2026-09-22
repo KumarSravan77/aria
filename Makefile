@@ -485,7 +485,10 @@ kafka-agent-demo:
 	curl -s -X POST -H "Authorization: Bearer $${API_TOKEN:-dev-user-token}" \
 	  -H "Content-Type: application/json" \
 	  http://localhost:8080/platform-agents/kafka \
-	  -d '{"incident":{"service":"fraud-detection-engine","severity":"P1","signals":["kafka","consumer lag","streaming"],"topic":"transactions.stream","consumer_group":"fraud-detection-engine"}}' | jq .
+	  -d @examples/kafka-diagnostic-request.json | jq .
+
+kafka-diagnostics-test: ## Test the read-only Kafka adapter and authorization boundary
+	python3 -m pytest tests/test_kafka_diagnostic_client.py tests/test_kafka_resource_scope.py tests/test_kafka_streaming_intelligence.py tests/test_platform_kafka_authorization.py -q
 
 eval-scorecard-demo:
 	curl -s -X POST -H "Authorization: Bearer $${API_TOKEN:-dev-user-token}" \

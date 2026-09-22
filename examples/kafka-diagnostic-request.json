@@ -1,0 +1,10 @@
+{
+  "incident": {
+    "service": "payment-events",
+    "severity": "P2",
+    "signals": ["kafka", "consumer lag"],
+    "topic": "payments",
+    "consumer_group": "fraud-detector"
+  },
+  "context": {}
+}

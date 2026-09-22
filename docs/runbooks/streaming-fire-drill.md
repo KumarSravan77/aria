@@ -50,6 +50,10 @@ metadata, and incident timeline. ARIA's Kafka agent is read-only.
 | 3 | read-only | Collect before, during and after producer, consumer, partition and latency windows | Symptoms have a clear time boundary |
 | 4 | read-only | Query ARIA Kafka agent for cluster, topic and consumer-group evidence | State whether live broker diagnostics were available |
 
+The Kafka agent reports `live_evidence_complete` only when all three live
+queries succeed. A single offset snapshot cannot prove a rebalance storm or
+hot key; correlate it with time-series metrics before attributing cause.
+
 ## Decision tree
 
 ```text

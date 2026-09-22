@@ -870,6 +870,12 @@ Added:
 - LangGraph routing for Kafka/streaming signals
 - sample streaming incident dataset
 
+The diagnostic adapter now performs bounded, read-only broker metadata,
+topic health, and group-offset lag queries when `KAFKA_BOOTSTRAP_SERVERS` and
+the Kafka client are available. Missing commits remain unknown rather than
+zero lag. `POST /platform-agents/kafka` requires an SRE role and service ReBAC.
+See `docs/integrations/KAFKA_DIAGNOSTICS.md` for configuration and limits.
+
 ARIA also accepts the versioned OpenModelOps evaluation produced by an approved
 Fire Drill experiment at `POST /integrations/fire-drill/streaming`. The endpoint
 requires authentication, rejects production experiments, preserves experiment

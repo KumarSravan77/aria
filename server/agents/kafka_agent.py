@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from server.platform.streaming.kafka.client import KafkaDiagnosticClient
+from server.platform.streaming.kafka.scopes import KafkaResourceScope
 from server.platform.streaming.kafka.analyzers import (
     KafkaLagAnalyzer,
     KafkaPartitionSkewAnalyzer,
@@ -22,6 +23,7 @@ class KafkaAgent:
     lag_analyzer: KafkaLagAnalyzer = field(default_factory=KafkaLagAnalyzer)
     rebalance_analyzer: KafkaRebalanceAnalyzer = field(default_factory=KafkaRebalanceAnalyzer)
     skew_analyzer: KafkaPartitionSkewAnalyzer = field(default_factory=KafkaPartitionSkewAnalyzer)
+    resource_scope: KafkaResourceScope = field(default_factory=KafkaResourceScope)
 
     def run(self, incident: dict[str, Any], context: dict[str, Any] | None = None) -> dict[str, Any]:
         context = context or {}
@@ -30,12 +32,18 @@ class KafkaAgent:
         topic = incident.get("topic") or context.get("topic")
         consumer_group = incident.get("consumer_group") or context.get("consumer_group")
 
-        cluster = self.client.cluster_health()
-        lag = self.client.consumer_group_lag(consumer_group=consumer_group, topic=topic)
-        topic_health = self.client.topic_health(topic=topic)
+        if self.resource_scope.allows(service, topic, consumer_group):
+            cluster = self.client.cluster_health()
+            lag = self.client.consumer_group_lag(consumer_group=consumer_group, topic=topic)
+            topic_health = self.client.topic_health(topic=topic)
+        else:
+            unavailable = {"available": False, "reason": "resource_scope_denied", "summary": "Kafka resource is not mapped to this service"}
+            cluster = unavailable
+            lag = unavailable
+            topic_health = unavailable
 
         observation = context.get("streaming_observation") or {}
-        lag_analysis = self.lag_analyzer.analyze(signals, metrics=observation or lag)
+        lag_analysis = self.lag_analyzer.analyze(signals, metrics={"drill_observation": observation, "live_offsets": lag})
         rebalance_analysis = self.rebalance_analyzer.analyze(signals, deployment_context=context.get("deployment"))
         skew_analysis = self.skew_analyzer.analyze(signals, topic=topic)
 
@@ -61,5 +69,8 @@ class KafkaAgent:
             "hypotheses": hypotheses,
             "summary": "Kafka streaming diagnostics completed",
             "available": cluster.get("available", False),
+            "live_evidence_complete": all(
+                item.get("available", False) for item in (cluster, lag, topic_health)
+            ),
             "safety_boundary": "read-only Kafka diagnostics; no streaming platform mutation",
         }

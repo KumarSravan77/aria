@@ -1,0 +1,5 @@
+# Local lab resource scope. Replace with governed service catalog mappings in deployments.
+services:
+  payment-events:
+    - topic: payments
+      consumer_group: fraud-detector

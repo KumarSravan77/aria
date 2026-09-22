@@ -20,3 +20,4 @@ opentelemetry-instrumentation-sqlalchemy==0.50b0
 opentelemetry-exporter-otlp==1.29.0
 pytest==8.3.4
 langgraph==1.2.11
+confluent-kafka==2.15.0
