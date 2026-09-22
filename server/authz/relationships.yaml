@@ -12,9 +12,9 @@ users:
 teams:
   platform:
     owns_services: [incident-investigator, checkout-api, kubernetes-platform]
-    supports_services: [checkout-api, payment-api, payments-api, order-api, kubernetes-platform]
+    supports_services: [checkout-api, payment-api, payments-api, payment-events, order-api, kubernetes-platform]
     can_approve_services: [checkout-api, payment-api, payments-api, order-api, kubernetes-platform]
   payments:
-    owns_services: [checkout-api, payment-api, payments-api, order-api]
+    owns_services: [checkout-api, payment-api, payments-api, payment-events, order-api]
     supports_services: [checkout-api, payment-api, order-api]
     can_approve_services: [checkout-api, payment-api, payments-api, order-api]

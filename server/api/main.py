@@ -62,6 +62,7 @@ from server.telemetry.router import router as telemetry_router
 from server.oncall.router import router as oncall_router
 from server.kubeflow.router import router as kubeflow_router
 from server.integrations.on_call_sre import router as on_call_sre_router
+from server.integrations.fire_drill import router as fire_drill_router
 
 from server.agents.orchestrator import MultiAgentOrchestrator
 from server.agents.metrics_agent import MetricsAgent
@@ -113,6 +114,7 @@ from server.db.models import AuditLog, OperationalMemoryEntry
 
 app = FastAPI(title="ARIA — Autonomous Resilience Intelligence Assistant", version="2.0.0")
 app.include_router(oncall_router)
+app.include_router(fire_drill_router)
 setup_otel(app)
 rag = RagService()
 analyzer = IncidentAnalyzer()

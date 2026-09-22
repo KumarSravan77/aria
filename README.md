@@ -870,6 +870,13 @@ Added:
 - LangGraph routing for Kafka/streaming signals
 - sample streaming incident dataset
 
+ARIA also accepts the versioned OpenModelOps evaluation produced by an approved
+Fire Drill experiment at `POST /integrations/fire-drill/streaming`. The endpoint
+requires authentication, rejects production experiments, preserves experiment
+and evidence digests, accepts only explicitly synthetic evidence, invokes only
+the read-only Kafka agent, and always returns
+`human-review-required`. See `docs/runbooks/streaming-fire-drill.md`.
+
 ## Hardening Review Updates
 
 ARIA includes hardening controls for:

@@ -26,7 +26,7 @@ class KafkaAgent:
     def run(self, incident: dict[str, Any], context: dict[str, Any] | None = None) -> dict[str, Any]:
         context = context or {}
         service = incident.get("service") or incident.get("target") or context.get("service") or "unknown"
-        signals = [str(x) for x in incident.get("signals", [])]
+        signals = [str(x).replace("_", " ") for x in incident.get("signals", [])]
         topic = incident.get("topic") or context.get("topic")
         consumer_group = incident.get("consumer_group") or context.get("consumer_group")
 
@@ -34,7 +34,8 @@ class KafkaAgent:
         lag = self.client.consumer_group_lag(consumer_group=consumer_group, topic=topic)
         topic_health = self.client.topic_health(topic=topic)
 
-        lag_analysis = self.lag_analyzer.analyze(signals, metrics=lag)
+        observation = context.get("streaming_observation") or {}
+        lag_analysis = self.lag_analyzer.analyze(signals, metrics=observation or lag)
         rebalance_analysis = self.rebalance_analyzer.analyze(signals, deployment_context=context.get("deployment"))
         skew_analysis = self.skew_analyzer.analyze(signals, topic=topic)
 
@@ -50,6 +51,7 @@ class KafkaAgent:
             "consumer_group": consumer_group,
             "cluster": cluster,
             "consumer_lag": lag,
+            "drill_observation": observation,
             "topic_health": topic_health,
             "analysis": {
                 "lag": lag_analysis,

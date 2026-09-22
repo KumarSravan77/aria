@@ -1,0 +1,26 @@
+{
+  "incident": {
+    "incident_id": "stream-demo-001",
+    "service": "payment-events",
+    "severity": "P2",
+    "source": "fire-drill",
+    "signals": ["kafka", "streaming", "CONSUMER_LAG", "REBALANCE_STORM"],
+    "topic": "payments",
+    "consumer_group": "fraud-detector"
+  },
+  "context": {
+    "experiment_id": "drill-demo-001",
+    "event_id": "event-demo-001",
+    "plan_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "evidence_digest": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "scenario": "network-latency",
+    "evidence_mode": "synthetic",
+    "environment": "staging",
+    "approved_by": "reliability-reviewer",
+    "blast_radius_percent": 10,
+    "automatic_remediation": false,
+    "streaming_observation": {},
+    "findings": [],
+    "slo": {}
+  }
+}
